@@ -3,304 +3,480 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMK SWASTA ASSISI - Portal Akademik</title>
+    <title>SMK SWASTA ASSISI - Portal Akademik Modern</title>
+    <!-- Tailwind CSS untuk Desain Modern & Profesional -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* Desain Modern & Profesional */
-        :root {
-            --primary: #e3242b; /* Merah sesuai gambar referensi */
-            --secondary: #fce8e8;
-            --dark: #333;
-            --light: #fff;
-            --gray: #f4f4f4;
-            --success: #28a745;
-            --danger: #dc3545;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--gray); color: var(--dark); }
-        
-        /* Header & Logo */
-        header { background-color: var(--primary); color: var(--light); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .logo { font-size: 24px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
-        
-        /* Container & Views */
-        .container { max-width: 1000px; margin: 20px auto; padding: 20px; background: var(--light); border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .view { display: none; }
-        .view.active { display: block; }
-
-        /* Buttons */
-        .btn { padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-success { background: var(--success); color: white; }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
-        .btn:hover { opacity: 0.8; }
-
-        /* Login Screen */
-        .login-box { text-align: center; margin-top: 100px; }
-        .login-box button { margin: 10px; font-size: 16px; padding: 15px 30px; }
-
-        /* Form Inputs */
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
-        .form-control { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
-
-        /* Jadwal Card (Seperti Gambar 3) */
-        .jadwal-card { border: 1px solid #ddd; border-radius: 10px; padding: 15px; margin-bottom: 15px; display: flex; gap: 20px; position: relative; overflow: hidden; }
-        .jadwal-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: #ffc107; }
-        .waktu-box { background: #ffc107; padding: 10px; border-radius: 5px; font-weight: bold; text-align: center; height: fit-content; }
-        .detail-jadwal { flex: 1; display: grid; grid-template-columns: 100px auto; gap: 5px; font-size: 14px; }
-        .detail-jadwal strong { color: #555; }
-        
-        /* Soal Ujian */
-        .soal-container { margin-bottom: 20px; padding: 15px; border-left: 4px solid var(--primary); background: #fafafa; }
-        .opsi { display: block; margin: 5px 0; padding: 10px; background: #eee; border-radius: 5px; cursor: pointer; }
-        .opsi input { margin-right: 10px; }
-        .textarea-ujian { width: 100%; height: 150px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; resize: vertical; }
-
-        /* Top Bar Ujian (Keamanan & Timer) */
-        .ujian-header { display: flex; justify-content: space-between; background: #222; color: white; padding: 10px 20px; border-radius: 5px; margin-bottom: 20px; position: sticky; top: 0; z-index: 100; }
-        
-        /* Grid Layout for Admin forms */
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .action-btns { margin-top: 10px; display: flex; gap: 10px; }
-        
-        /* Tab Nav */
-        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
-        .nav-tabs button { flex: 1; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .transition-all { transition: all 0.3s ease; }
     </style>
 </head>
-<body>
+<body class="text-slate-800 antialiased selection:bg-red-500 selection:text-white">
 
-    <header>
-        <div class="logo">🏫 SMK SWASTA ASSISI</div>
-        <div id="user-info">Portal Terpadu</div>
+    <!-- HEADER / NAVBAR -->
+    <header class="bg-gradient-to-r from-red-800 to-red-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white p-2 rounded-xl shadow-md text-red-800 font-bold text-xl flex items-center justify-center w-12 h-12">
+                    <i class="fa-solid fa-school"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-wide">SMK SWASTA ASSISI</h1>
+                    <p class="text-xs text-red-200">Portal Akademik & Ujian Terpadu</p>
+                </div>
+            </div>
+            <div id="user-nav-status" class="hidden flex items-center space-x-4">
+                <span id="nav-username" class="text-sm font-medium bg-red-950 px-3 py-1 rounded-full border border-red-700"></span>
+                <button onclick="logout()" class="bg-white text-red-800 hover:bg-red-100 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all shadow">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
+                </button>
+            </div>
+        </div>
     </header>
 
-    <!-- PILIH LOGIN -->
-    <div id="view-login" class="container view active login-box">
-        <h2>Selamat Datang di Portal Pembelajaran</h2>
-        <p>Silakan pilih akses login Anda:</p><br>
-        <button class="btn btn-outline" onclick="switchView('view-admin')">👤 Login Admin</button>
-        <button class="btn btn-outline" onclick="switchView('view-guru')">👨‍🏫 Login Guru</button>
-        <button class="btn btn-primary" onclick="switchView('view-siswa')">👨‍🎓 Login Siswa</button>
-    </div>
-
-    <!-- ==================== DASHBOARD ADMIN ==================== -->
-    <div id="view-admin" class="container view">
-        <div class="nav-tabs">
-            <button class="btn btn-primary" onclick="showAdminTab('tab-jadwal')">Jadwal Ujian & Sekolah</button>
-            <button class="btn btn-outline" onclick="showAdminTab('tab-materi')">Kelola Materi</button>
-            <button class="btn btn-outline" onclick="showAdminTab('tab-presensi')">Presensi & QR</button>
-            <button class="btn btn-danger" onclick="switchView('view-login')">Logout</button>
-        </div>
-
-        <!-- TAB JADWAL (Sesuai Gambar 3) -->
-        <div id="tab-jadwal" class="admin-tab">
-            <h3>Input Jadwal Ujian Sekolah</h3>
-            <div class="grid-2">
-                <div class="form-group"><label>Hari/Tanggal/Tahun</label><input type="date" class="form-control" id="tgl-ujian"></div>
-                <div class="form-group"><label>Ujian (Mata Pelajaran)</label><input type="text" class="form-control" placeholder="Contoh: MATEMATIKA"></div>
-                <div class="form-group"><label>Jam (Mulai - Selesai)</label><input type="time" class="form-control"></div>
-                <div class="form-group">
-                    <label>Kelas</label>
-                    <select class="form-control" multiple>
-                        <option>10 RPL</option><option>10 TB</option><option>10 AK</option>
-                        <option>11 RPL</option><option>11 TB</option><option>11 AK</option>
-                        <option>12 RPL</option><option>12 TB</option><option>12 AK</option>
+    <!-- HALAMAN UTAMA / LOGIN -->
+    <main id="app-container" class="max-w-7xl mx-auto px-4 py-8">
+        
+        <!-- SECTION: LOGIN SELECTION -->
+        <section id="login-section" class="max-w-md mx-auto bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden mt-6">
+            <div class="bg-red-800 p-6 text-white text-center">
+                <h2 class="text-2xl font-bold">Selamat Datang</h2>
+                <p class="text-sm text-red-200 mt-1">Silakan masuk sesuai hak akses Anda</p>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Pilih Role Akses</label>
+                    <select id="login-role" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:outline-none">
+                        <option value="admin">Admin Sekolah</option>
+                        <option value="guru">Guru Pengajar / Pengawas</option>
+                        <option value="siswa">Siswa</option>
                     </select>
                 </div>
-                <div class="form-group"><label>Ruang & Sesi</label><input type="text" class="form-control" placeholder="Ruang 1-100 / Sesi 1-100"></div>
-                <div class="form-group"><label>Nama Pengawas</label><input type="text" class="form-control"></div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Username / ID</label>
+                    <input type="text" id="login-user" placeholder="Masukkan ID / Nama Pengguna" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
+                    <input type="password" id="login-pass" placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:outline-none">
+                </div>
+                <button onclick="handleLogin()" class="w-full bg-red-800 hover:bg-red-900 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-red-800/20">
+                    Masuk Sistem
+                </button>
             </div>
-            <div class="action-btns">
-                <button class="btn btn-success" onclick="alert('Data Disimpan!')">💾 SAVE</button>
-                <button class="btn btn-outline">✏️ EDIT</button>
-                <button class="btn btn-danger" onclick="alert('Data Dihapus!')">🗑️ HAPUS</button>
-            </div>
+        </section>
 
-            <hr style="margin: 20px 0;">
+        <!-- DASHBOARD UTAMA (TERSEMBUNYI SEBELUM LOGIN) -->
+        <div id="dashboard-section" class="hidden space-y-6">
             
-            <h3>Contoh Tampilan Jadwal (Mirip Desain Aplikasi)</h3>
-            <div class="jadwal-card">
-                <div class="waktu-box">
-                    08:00<br>|<br>10:00
-                </div>
-                <div class="detail-jadwal">
-                    <strong>Lokasi</strong> <span>: SMK SWASTA ASSISI</span>
-                    <strong>Tingkat Kelas</strong> <span>: 12 RPL, 12 AK</span>
-                    <strong>Nama Ruang</strong> <span>: Ruang 14 (Sesi 1)</span>
-                    <strong>Mata Uji</strong> <span>: MATEMATIKA</span>
-                    <strong>Pengawas</strong> <span>: Bpk. Budi Santoso</span>
-                    <strong>Siswa</strong> <span>: 30 Siswa</span>
-                </div>
+            <!-- TAB MENU NAVIGASI DASHBOARD -->
+            <div class="flex flex-wrap gap-2 bg-white p-3 rounded-2xl shadow-sm border border-slate-200">
+                <button onclick="switchTab('jadwal-ujian')" class="tab-btn px-4 py-2 rounded-xl font-semibold text-sm bg-red-800 text-white transition-all"><i class="fa-solid fa-calendar-days mr-2"></i>Jadwal Ujian</button>
+                <button onclick="switchTab('jadwal-kbm')" class="tab-btn px-4 py-2 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-100 transition-all"><i class="fa-solid fa-book-open mr-2"></i>Jadwal KBM</button>
+                <button onclick="switchTab('presensi')" class="tab-btn px-4 py-2 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-100 transition-all"><i class="fa-solid fa-qrcode mr-2"></i>Presensi & QR</button>
+                <button onclick="switchTab('materi')" class="tab-btn px-4 py-2 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-100 transition-all"><i class="fa-solid fa-file-arrow-up mr-2"></i>Materi</button>
+                <button onclick="switchTab('ujian')" class="tab-btn px-4 py-2 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-100 transition-all"><i class="fa-solid fa-laptop-code mr-2"></i>Ujian Online</button>
             </div>
-        </div>
 
-        <!-- TAB MATERI -->
-        <div id="tab-materi" class="admin-tab" style="display:none;">
-            <h3>Input Materi Sekolah</h3>
-            <div class="grid-2">
-                <div class="form-group"><label>Judul Materi</label><input type="text" class="form-control" placeholder="Contoh: Hidup Sehat"></div>
-                <div class="form-group"><label>Mapel</label><input type="text" class="form-control" placeholder="Contoh: IPA"></div>
-                <div class="form-group"><label>Upload File (Word/Excel/PPT/Video)</label><input type="file" class="form-control"></div>
-                <div class="form-group"><label>Oleh (Nama Guru)</label><input type="text" class="form-control"></div>
+            <!-- TAB 1: JADWAL UJIAN SEKOLAH -->
+            <div id="tab-jadwal-ujian" class="tab-content space-y-4">
+                <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-calendar-check text-red-800 mr-2"></i>Jadwal Ujian Sekolah</h3>
+                    <button onclick="openModal('modal-jadwal-ujian')" class="admin-only bg-red-800 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-red-900 shadow"><i class="fa-solid fa-plus mr-1"></i> Tambah Jadwal Ujian</button>
+                </div>
+                <!-- Contoh Tampilan Horizontal Tanggal (Referensi Gambar 3) -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex gap-2 overflow-x-auto">
+                    <div class="flex-shrink-0 bg-slate-100 border border-slate-200 px-4 py-3 rounded-xl text-center cursor-pointer hover:bg-red-50"><span class="block text-xs text-slate-500">Sen</span><span class="text-lg font-bold">9</span></div>
+                    <div class="flex-shrink-0 bg-red-800 text-white px-4 py-3 rounded-xl text-center cursor-pointer shadow"><span class="block text-xs text-red-200">Sel</span><span class="text-lg font-bold">10</span></div>
+                    <div class="flex-shrink-0 bg-slate-100 border border-slate-200 px-4 py-3 rounded-xl text-center cursor-pointer hover:bg-red-50"><span class="block text-xs text-slate-500">Rab</span><span class="text-lg font-bold">11</span></div>
+                    <div class="flex-shrink-0 bg-slate-100 border border-slate-200 px-4 py-3 rounded-xl text-center cursor-pointer hover:bg-red-50"><span class="block text-xs text-slate-500">Kam</span><span class="text-lg font-bold">12</span></div>
+                    <div class="flex-shrink-0 bg-slate-100 border border-slate-200 px-4 py-3 rounded-xl text-center cursor-pointer hover:bg-red-50"><span class="block text-xs text-slate-500">Jum</span><span class="text-lg font-bold">13</span></div>
+                </div>
+                <!-- Container List Jadwal Ujian -->
+                <div id="list-jadwal-ujian" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Item Contoh -->
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full">Selasa, 10 November 2026</span>
+                            <span class="text-xs font-semibold text-slate-500">Ruang: 05 | Sesi: 1</span>
+                        </div>
+                        <h4 class="text-base font-bold text-slate-900">UJIAN: MATEMATIKA</h4>
+                        <div class="text-sm space-y-1 text-slate-600">
+                            <p><i class="fa-regular fa-clock w-5 text-red-800"></i> Jam: 08:00 - 10:00 WIB</p>
+                            <p><i class="fa-solid fa-location-dot w-5 text-red-800"></i> Lokasi: SMK SWASTA ASSISI</p>
+                            <p><i class="fa-solid fa-graduation-cap w-5 text-red-800"></i> Kelas: 10 RPL, 10 TB, 10 AK</p>
+                            <p><i class="fa-solid fa-users w-5 text-red-800"></i> Jumlah Siswa: 35 Orang</p>
+                            <p><i class="fa-solid fa-user-tie w-5 text-red-800"></i> Pengawas: Dra. Maria Situmorang</p>
+                        </div>
+                        <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100 admin-only">
+                            <button onclick="editItem('ujian', 0)" class="bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-amber-600"><i class="fa-solid fa-pen-to-square mr-1"></i> Edit</button>
+                            <button onclick="deleteItem('ujian', 0)" class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-red-700"><i class="fa-solid fa-trash mr-1"></i> Hapus</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <button class="btn btn-success">💾 SAVE MATERI</button>
-        </div>
 
-        <!-- TAB PRESENSI & QR -->
-        <div id="tab-presensi" class="admin-tab" style="display:none;">
-            <h3>Presensi & Generate QR Code</h3>
-            <p>Fitur Scan QR untuk Siswa dan Guru hadir di sini.</p>
-            <div style="width: 200px; height: 200px; background: #ddd; margin: 20px auto; display: flex; align-items: center; justify-content: center; border: 2px dashed #999;">
-                [ Mockup QR Code ]
+            <!-- TAB 2: JADWAL KBM SEKOLAH -->
+            <div id="tab-jadwal-kbm" class="tab-content hidden space-y-4">
+                <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-book text-red-800 mr-2"></i>Jadwal KBM Sekolah</h3>
+                    <button onclick="openModal('modal-jadwal-kbm')" class="admin-only bg-red-800 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-red-900 shadow"><i class="fa-solid fa-plus mr-1"></i> Tambah Jadwal KBM</button>
+                </div>
+                <div id="list-jadwal-kbm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Rabu, 11 November 2026</span>
+                            <span class="text-xs font-semibold text-slate-500">Les ke-1 s.d 3</span>
+                        </div>
+                        <h4 class="text-base font-bold text-slate-900">MATAPELAJARAN: MATEMATIKA</h4>
+                        <div class="text-sm space-y-1 text-slate-600">
+                            <p><i class="fa-regular fa-clock w-5 text-red-800"></i> Jam: 07:30 - 09:15 WIB</p>
+                            <p><i class="fa-solid fa-location-dot w-5 text-red-800"></i> Lokasi: SMK SWASTA ASSISI</p>
+                            <p><i class="fa-solid fa-graduation-cap w-5 text-red-800"></i> Kelas: 11 RPL, 11 TB, 11 AK</p>
+                            <p><i class="fa-solid fa-users w-5 text-red-800"></i> Jumlah Siswa: 30 Orang</p>
+                            <p><i class="fa-solid fa-chalkboard-user w-5 text-red-800"></i> Pengajar: Bpk. J. Sinaga, S.Pd</p>
+                        </div>
+                        <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100 admin-only">
+                            <button onclick="editItem('kbm', 0)" class="bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-amber-600"><i class="fa-solid fa-pen-to-square mr-1"></i> Edit</button>
+                            <button onclick="deleteItem('kbm', 0)" class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-red-700"><i class="fa-solid fa-trash mr-1"></i> Hapus</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="action-btns" style="justify-content: center;">
-                <button class="btn btn-primary">Generate QR Guru</button>
-                <button class="btn btn-success">Generate QR Siswa</button>
+
+            <!-- TAB 3: PRESENSI & SCAN QR -->
+            <div id="tab-presensi" class="tab-content hidden space-y-4">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center space-y-4">
+                    <h3 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-qrcode text-red-800 mr-2"></i>Scan QR Code Presensi Ujian & KBM</h3>
+                    <p class="text-sm text-slate-600 max-w-md mx-auto">Arahkan kamera perangkat Anda atau tunjukkan QR Code identitas Anda kepada pengawas/guru untuk merekam kehadiran secara otomatis.</p>
+                    <div class="w-48 h-48 mx-auto bg-slate-100 border-4 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden">
+                        <i class="fa-solid fa-camera text-4xl text-slate-400 mb-2"></i>
+                        <span class="text-xs font-semibold text-slate-500">Kamera Scanner Aktif</span>
+                        <div class="absolute inset-0 bg-red-800/10 animate-pulse"></div>
+                    </div>
+                    <button onclick="alert('Presensi Berhasil Direkam!')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-all">
+                        <i class="fa-solid fa-check mr-1"></i> Simulasi Scan QR Hadir
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 4: MATERI PELAJARAN -->
+            <div id="tab-materi" class="tab-content hidden space-y-4">
+                <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-folder-open text-red-800 mr-2"></i>Materi Pembelajaran</h3>
+                    <button onclick="openModal('modal-materi')" class="admin-guru-only bg-red-800 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-red-900 shadow"><i class="fa-solid fa-upload mr-1"></i> Upload Materi Baru</button>
+                </div>
+                <div id="list-materi" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+                        <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">Rabu, 11 November 2026</span>
+                        <h4 class="text-base font-bold text-slate-900">Judul: Hidup Sehat & Bugar</h4>
+                        <div class="text-sm space-y-1 text-slate-600">
+                            <p><i class="fa-solid fa-book-bookmark w-5 text-red-800"></i> Mapel: IPA</p>
+                            <p><i class="fa-solid fa-graduation-cap w-5 text-red-800"></i> Kelas: 10 RPL, 10 TB, 10 AK</p>
+                            <p><i class="fa-solid fa-user-tie w-5 text-red-800"></i> Guru: Ibu R. Br. Ginting, S.Pd</p>
+                            <p><i class="fa-solid fa-file-arrow-down w-5 text-red-800"></i> File: <a href="#" class="text-red-600 underline font-semibold">Materi_HidupSehat.docx</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: UJIAN ONLINE -->
+            <div id="tab-ujian" class="tab-content hidden space-y-4">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-4 border-b border-slate-100 gap-4">
+                        <div>
+                            <span class="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full">Ujian Online Aktif</span>
+                            <h3 class="text-xl font-bold text-slate-900 mt-1">Mata Pelajaran: Pendidikan Jasmani & Kesehatan (IPA)</h3>
+                        </div>
+                        <div class="bg-amber-50 border border-amber-200 px-4 py-2 rounded-xl flex items-center space-x-3">
+                            <i class="fa-solid fa-stopwatch text-amber-600 text-xl"></i>
+                            <div>
+                                <span class="block text-xs text-amber-700 font-medium">Sisa Waktu Ujian</span>
+                                <span id="exam-timer" class="text-lg font-bold text-amber-800">20:00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AREA SOAL UJIAN -->
+                    <div id="exam-form-area" class="space-y-6">
+                        <!-- Soal Pilihan Berganda -->
+                        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                            <p class="font-bold text-slate-900">1. Apa arti dari hidup sehat dari guru?</p>
+                            <div class="space-y-2 text-sm">
+                                <label class="flex items-center space-x-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-red-500"><input type="radio" name="q1" value="A"> <span>A. hidup sehat</span></label>
+                                <label class="flex items-center space-x-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-red-500"><input type="radio" name="q1" value="B"> <span>B. Hidup kotor</span></label>
+                                <label class="flex items-center space-x-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-red-500"><input type="radio" name="q1" value="C"> <span>C. hidup malas</span></label>
+                                <label class="flex items-center space-x-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-red-500"><input type="radio" name="q1" value="D"> <span>D. Hidup Rajin</span></label>
+                                <label class="flex items-center space-x-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-red-500"><input type="radio" name="q1" value="E"> <span>E. Hidup suka</span></label>
+                            </div>
+                            <button onclick="checkMultipleChoice(this, 'C')" class="bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-slate-900">Periksa Jawaban</button>
+                            <div class="result-box hidden mt-2 p-3 rounded-xl text-sm font-semibold"></div>
+                        </div>
+
+                        <!-- Soal Essay / Isian -->
+                        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                            <p class="font-bold text-slate-900">2. Apa arti hidup sehat menurut anda? Jelaskan secara rinci (100–900 kata).</p>
+                            <textarea rows="6" placeholder="Ketik jawaban essay panjang ke bawah di sini..." class="w-full p-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:outline-none text-sm"></textarea>
+                            <button onclick="checkEssay(this)" class="bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-slate-900">Kirim Essay</button>
+                            <div class="essay-result hidden mt-2 p-3 rounded-xl text-sm font-semibold"></div>
+                        </div>
+
+                        <div class="flex justify-end space-x-3 pt-4">
+                            <button onclick="submitExamManually()" class="bg-red-800 hover:bg-red-900 text-white font-semibold px-6 py-2.5 rounded-xl shadow">Kumpul Jawaban Ujian</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- MODAL POPUP ADMIN: TAMBAH/EDIT JADWAL UJIAN -->
+    <div id="modal-jadwal-ujian" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-bold text-slate-900">Form Kelola Jadwal Ujian</h3>
+            <div class="space-y-3 text-sm">
+                <div><label class="font-semibold">Nama Ujian</label><input type="text" id="inp-nama-ujian" placeholder="Contoh: MATEMATIKA" class="w-full p-2.5 border rounded-xl"></div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div><label class="font-semibold">Tanggal</label><input type="date" id="inp-tgl-ujian" class="w-full p-2.5 border rounded-xl"></div>
+                    <div><label class="font-semibold">Jam Mulai - Selesai</label><input type="text" id="inp-jam-ujian" placeholder="08:00 - 10:00" class="w-full p-2.5 border rounded-xl"></div>
+                </div>
+                <div><label class="font-semibold">Lokasi</label><input type="text" id="inp-lokasi-ujian" value="SMK SWASTA ASSISI" class="w-full p-2.5 border rounded-xl"></div>
+                <div><label class="font-semibold">Kelas</label><input type="text" id="inp-kelas-ujian" value="10 RPL, 10 TB, 10 AK" class="w-full p-2.5 border rounded-xl"></div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div><label class="font-semibold">Ruang</label><input type="text" id="inp-ruang-ujian" placeholder="1-100" class="w-full p-2.5 border rounded-xl"></div>
+                    <div><label class="font-semibold">Sesi</label><input type="text" id="inp-sesi-ujian" placeholder="1-100" class="w-full p-2.5 border rounded-xl"></div>
+                    <div><label class="font-semibold">Jumlah Siswa</label><input type="text" id="inp-jml-ujian" placeholder="1-100" class="w-full p-2.5 border rounded-xl"></div>
+                </div>
+                <div><label class="font-semibold">Nama Pengawas</label><input type="text" id="inp-pengawas-ujian" placeholder="Nama Pengawas" class="w-full p-2.5 border rounded-xl"></div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-3 border-t">
+                <button onclick="closeModal('modal-jadwal-ujian')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-xl font-semibold hover:bg-slate-300">Kembali</button>
+                <button onclick="saveJadwalUjian()" class="px-4 py-2 bg-red-800 text-white rounded-xl font-semibold hover:bg-red-900">Save</button>
             </div>
         </div>
     </div>
 
-    <!-- ==================== HALAMAN UJIAN (SISWA) ==================== -->
-    <div id="view-siswa" class="container view">
-        <div class="ujian-header">
-            <div><strong>Mapel:</strong> MATEMATIKA (12 RPL)</div>
-            <div>⏱️ Sisa Waktu: <span id="timer" style="color:#ffc107; font-weight:bold;">02:00</span></div>
-        </div>
-
-        <h3 style="color:var(--danger);">Keamanan Aktif! Dilarang Pindah Tab atau Screenshot.</h3>
-        <br>
-
-        <!-- Pilihan Ganda -->
-        <div class="soal-container">
-            <p><strong>1. Apa arti dari hidup sehat menurut Anda?</strong></p>
-            <label class="opsi"><input type="radio" name="soal1"> A. Hidup sehat</label>
-            <label class="opsi"><input type="radio" name="soal1"> B. Hidup kotor</label>
-            <label class="opsi"><input type="radio" name="soal1"> C. Hidup malas</label>
-            <label class="opsi"><input type="radio" name="soal1"> D. Hidup rajin</label>
-            <label class="opsi"><input type="radio" name="soal1"> E. Hidup suka</label>
-            <div class="action-btns">
-                <button class="btn btn-success" onclick="alert('Jawaban Benar!')">Cek Benar</button>
-                <button class="btn btn-danger" onclick="alert('Jawaban Salah!')">Cek Salah</button>
+    <!-- MODAL POPUP ADMIN: TAMBAH/EDIT JADWAL KBM -->
+    <div id="modal-jadwal-kbm" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-bold text-slate-900">Form Kelola Jadwal KBM</h3>
+            <div class="space-y-3 text-sm">
+                <div><label class="font-semibold">Mata Pelajaran</label><input type="text" id="inp-mapel-kbm" placeholder="Contoh: MATEMATIKA" class="w-full p-2.5 border rounded-xl"></div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div><label class="font-semibold">Tanggal</label><input type="date" id="inp-tgl-kbm" class="w-full p-2.5 border rounded-xl"></div>
+                    <div><label class="font-semibold">Jam Les (1-10)</label><input type="text" id="inp-jam-kbm" placeholder="Les 1-3 (07:30)" class="w-full p-2.5 border rounded-xl"></div>
+                </div>
+                <div><label class="font-semibold">Lokasi</label><input type="text" id="inp-lokasi-kbm" value="SMK SWASTA ASSISI" class="w-full p-2.5 border rounded-xl"></div>
+                <div><label class="font-semibold">Kelas</label><input type="text" id="inp-kelas-kbm" value="11 RPL, 11 TB, 11 AK" class="w-full p-2.5 border rounded-xl"></div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div><label class="font-semibold">Jumlah Siswa</label><input type="text" id="inp-jml-kbm" placeholder="1-100" class="w-full p-2.5 border rounded-xl"></div>
+                    <div><label class="font-semibold">Nama Pengajar</label><input type="text" id="inp-pengajar-kbm" placeholder="Nama Guru" class="w-full p-2.5 border rounded-xl"></div>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-3 border-t">
+                <button onclick="closeModal('modal-jadwal-kbm')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-xl font-semibold hover:bg-slate-300">Kembali</button>
+                <button onclick="saveJadwalKbm()" class="px-4 py-2 bg-red-800 text-white rounded-xl font-semibold hover:bg-red-900">Save</button>
             </div>
         </div>
-
-        <!-- Essay -->
-        <div class="soal-container">
-            <p><strong>2. Uraikan (Essay): Apa hidup sehat menurut anda?</strong></p>
-            <textarea class="textarea-ujian" placeholder="Ketik jawaban Anda di sini (100 - 900 kata)..."></textarea>
-        </div>
-
-        <button class="btn btn-primary" style="width: 100%; padding: 15px; font-size: 18px;" onclick="kumpulUjian()">KUMPULKAN UJIAN SEKARANG</button>
-        <button class="btn btn-danger" style="width: 100%; margin-top: 10px;" onclick="keluarUjian()">Keluar (Hanya Tes)</button>
     </div>
 
-    <!-- SCRIPT LOGIKA PROGRAM -->
+    <!-- MODAL POPUP: UPLOAD MATERI -->
+    <div id="modal-materi" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-bold text-slate-900">Form Upload Materi Pembelajaran</h3>
+            <div class="space-y-3 text-sm">
+                <div><label class="font-semibold">Judul Materi</label><input type="text" id="inp-judul-materi" placeholder="Contoh: Hidup Sehat" class="w-full p-2.5 border rounded-xl"></div>
+                <div><label class="font-semibold">Mata Pelajaran (Terpisah dari Kelas)</label><input type="text" id="inp-mapel-materi" placeholder="Contoh: IPA" class="w-full p-2.5 border rounded-xl"></div>
+                <div><label class="font-semibold">Kelas</label><input type="text" id="inp-kelas-materi" value="10 RPL, 10 TB, 10 AK" class="w-full p-2.5 border rounded-xl"></div>
+                <div><label class="font-semibold">Upload File (Word, Excel, PPT, Gambar, Video)</label><input type="file" id="inp-file-materi" class="w-full p-2 border rounded-xl"></div>
+                <div><label class="font-semibold">Materi Oleh (Nama Guru)</label><input type="text" id="inp-guru-materi" placeholder="Nama Guru" class="w-full p-2.5 border rounded-xl"></div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-3 border-t">
+                <button onclick="closeModal('modal-materi')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-xl font-semibold hover:bg-slate-300">Kembali</button>
+                <button onclick="saveMateri()" class="px-4 py-2 bg-red-800 text-white rounded-xl font-semibold hover:bg-red-900">Save & Upload</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT SISTEM -->
     <script>
-        let isExamActive = false;
+        let currentRole = '';
 
-        // Navigasi View
-        function switchView(viewId) {
-            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
+        function handleLogin() {
+            const role = document.getElementById('login-role').value;
+            const user = document.getElementById('login-user').value || role.toUpperCase();
             
-            if(viewId === 'view-siswa') {
-                mulaiUjian();
+            currentRole = role;
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('dashboard-section').classList.remove('hidden');
+            document.getElementById('user-nav-status').classList.remove('hidden');
+            document.getElementById('nav-username').innerText = `${user} (${role.toUpperCase()})`;
+
+            // Sembunyikan tombol admin jika bukan admin/guru
+            const adminElements = document.querySelectorAll('.admin-only');
+            const adminGuruElements = document.querySelectorAll('.admin-guru-only');
+
+            if(role === 'siswa') {
+                adminElements.forEach(el => el.classList.add('hidden'));
+                adminGuruElements.forEach(el => el.classList.add('hidden'));
+                initAntiCheat(); // Aktifkan sistem keamanan ujian khusus siswa
+            } else if(role === 'guru') {
+                adminElements.forEach(el => el.classList.add('hidden'));
+                adminGuruElements.forEach(el => el.classList.remove('hidden'));
             } else {
-                isExamActive = false;
+                adminElements.forEach(el => el.classList.remove('hidden'));
+                adminGuruElements.forEach(el => el.classList.remove('hidden'));
             }
+
+            startTimer(20 * 60); // Timer ujian 20 menit
         }
 
-        // Navigasi Admin Tabs
-        function showAdminTab(tabId) {
-            document.querySelectorAll('.admin-tab').forEach(el => el.style.display = 'none');
-            document.getElementById(tabId).style.display = 'block';
+        function logout() {
+            location.reload();
         }
 
-        // --- FITUR 8: LOGIKA UJIAN & ANTI CHEAT --- //
-
-        // 1. Timer Otomatis (Durasi diset 2 menit untuk contoh)
-        let totalSeconds = 120; 
-        let timerInterval;
-
-        function mulaiUjian() {
-            isExamActive = true;
-            totalSeconds = 120; // reset
-            clearInterval(timerInterval);
-            timerInterval = setInterval(updateTimer, 1000);
-        }
-
-        function updateTimer() {
-            if(!isExamActive) return;
-
-            let m = Math.floor(totalSeconds / 60);
-            let s = totalSeconds % 60;
-            document.getElementById('timer').innerText = 
-                (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
             
-            // Pengingat 1 menit terakhir
-            if(totalSeconds === 60) {
-                alert("Peringatan: Waktu tersisa 1 menit lagi! Sistem akan mengumpulkan otomatis.");
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-red-800', 'text-white');
+                btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+            });
+            event.currentTarget.classList.add('bg-red-800', 'text-white');
+            event.currentTarget.classList.remove('text-slate-600', 'hover:bg-slate-100');
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.getElementById(modalId).classList.add('flex');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.getElementById(modalId).classList.remove('flex');
+        }
+
+        // Simulasi Aksi CRUD
+        function saveJadwalUjian() {
+            alert('Jadwal Ujian berhasil disimpan!');
+            closeModal('modal-jadwal-ujian');
+        }
+
+        function saveJadwalKbm() {
+            alert('Jadwal KBM berhasil disimpan!');
+            closeModal('modal-jadwal-kbm');
+        }
+
+        function saveMateri() {
+            alert('Materi berhasil diunggah!');
+            closeModal('modal-materi');
+        }
+
+        function editItem(type, id) {
+            alert(`Mode Edit untuk data ${type} #${id}`);
+            if(type === 'ujian') openModal('modal-jadwal-ujian');
+            if(type === 'kbm') openModal('modal-jadwal-kbm');
+        }
+
+        function deleteItem(type, id) {
+            if(confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                alert('Data berhasil dihapus.');
+            }
+        }
+
+        // Penilaian Pilihan Berganda (Tombol Hijau & Merah Sesuai Permintaan)
+        function checkMultipleChoice(btn, correctAns) {
+            const parent = btn.parentElement;
+            const selected = parent.querySelector('input[type="radio"]:checked');
+            const resultBox = parent.querySelector('.result-box');
+            
+            resultBox.classList.remove('hidden');
+            if(!selected) {
+                resultBox.className = "result-box mt-2 p-3 rounded-xl text-sm font-semibold bg-amber-100 text-amber-800";
+                resultBox.innerText = "Pilih salah satu opsi terlebih dahulu!";
+                return;
             }
 
-            // Kumpul Otomatis
-            if (totalSeconds <= 0) {
-                kumpulUjian();
+            if(selected.value === correctAns) {
+                resultBox.className = "result-box mt-2 p-3 rounded-xl text-sm font-semibold bg-emerald-600 text-white";
+                resultBox.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Jawaban BENAR: C. hidup malas (Sesuai Kunci Admin)`;
             } else {
-                totalSeconds--;
+                resultBox.className = "result-box mt-2 p-3 rounded-xl text-sm font-semibold bg-red-600 text-white";
+                resultBox.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i> Jawaban SALAH: E. Hidup suka (Kunci Benar: C)`;
             }
         }
 
-        function kumpulUjian() {
-            clearInterval(timerInterval);
-            isExamActive = false;
-            alert("Ujian Selesai! Jawaban telah dikumpulkan.");
-            switchView('view-login');
+        function checkEssay(btn) {
+            const parent = btn.parentElement;
+            const textVal = parent.querySelector('textarea').value;
+            const resultBox = parent.querySelector('.essay-result');
+            
+            resultBox.classList.remove('hidden');
+            if(textVal.length < 10) {
+                resultBox.className = "essay-result mt-2 p-3 rounded-xl text-sm font-semibold bg-amber-100 text-amber-800";
+                resultBox.innerText = "Jawaban terlalu singkat, mohon isi lebih lengkap.";
+                return;
+            }
+
+            resultBox.className = "essay-result mt-2 p-3 rounded-xl text-sm font-semibold bg-emerald-600 text-white";
+            resultBox.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Jawaban Essay Disimpan. <br>Kunci Benar dari Admin: Hidup adalah suatu proses keseriusan dalam mencapai tujuan.`;
         }
 
-        function keluarUjian() {
-            clearInterval(timerInterval);
-            isExamActive = false;
-            switchView('view-login');
+        // TIMER OTOMATIS & KUMPUL OTOMATIS
+        function startTimer(duration) {
+            let timer = duration, minutes, seconds;
+            const display = document.getElementById('exam-timer');
+            
+            const interval = setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.textContent = minutes + ":" + seconds;
+
+                // Jika tinggal 1 menit (60 detik), peringatkan otomatis
+                if (timer === 60) {
+                    alert('Peringatan! Waktu ujian tinggal 1 menit lagi dan akan dikumpulkan otomatis.');
+                }
+
+                if (--timer < 0) {
+                    clearInterval(interval);
+                    alert('Waktu ujian telah habis! Jawaban Anda dikumpulkan otomatis oleh sistem.');
+                    submitExamManually();
+                }
+            }, 1000);
         }
 
-        // 2. Alarm Suara (Web Audio API)
-        function playAlarm() {
+        function submitExamManually() {
+            alert('Ujian berhasil dikumpulkan dan dikirim ke database guru & admin.');
+            switchTab('jadwal-ujian');
+        }
+
+        // SISTEM KEAMANAN ANTI-CHEAT (Deteksi Keluar Layar / Tab)
+        function initAntiCheat() {
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    playAlarmSound();
+                    alert('PERINGATAN KEAMANAN!\nAnda terdeteksi keluar dari halaman soal atau mencoba mencari jawaban dari AI/Google!\nTindakan ini dicatat oleh pengawas.');
+                }
+            });
+        }
+
+        function playAlarmSound() {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = ctx.createOscillator();
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(800, ctx.currentTime);
+            osc.type = 'sine';
+            osc.frequency.value = 587.33; // Nada D5 peringatan
             osc.connect(ctx.destination);
             osc.start();
-            osc.stop(ctx.currentTime + 1.5); // Bunyi selama 1.5 detik
+            setTimeout(() => { osc.stop(); }, 500);
         }
-
-        // 3. Deteksi Pindah Tab (Mencegah buka Google/AI)
-        document.addEventListener("visibilitychange", () => {
-            if (document.hidden && isExamActive) {
-                playAlarm();
-                alert("🚨 PERINGATAN! Anda terdeteksi keluar dari layar ujian! \nPelanggaran telah dicatat oleh sistem sekolah!");
-                // Secara real-backend, ini akan mengirim trigger ke database admin.
-            }
-        });
-
-        // 4. Mencegah Klik Kanan & Inspect Element
-        document.addEventListener("contextmenu", (e) => {
-            if(isExamActive) {
-                e.preventDefault();
-            }
-        });
-
-        // 5. Mencegah Screenshot (Mendeteksi Tombol PrintScreen / Copy)
-        document.addEventListener("keyup", (e) => {
-            if (isExamActive && (e.key === 'PrintScreen')) {
-                navigator.clipboard.writeText(''); // Kosongkan clipboard
-                playAlarm();
-                alert("🚨 Dilarang mengambil tangkapan layar (Screenshot)!");
-            }
-        });
-
     </script>
 </body>
 </html>
