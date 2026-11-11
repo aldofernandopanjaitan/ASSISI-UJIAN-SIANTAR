@@ -291,4 +291,414 @@
                                             <td><span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold">KBM HARIAN</span></td>
                                             <td class="admin-guru-only text-center">
                                                 <button class="bg-amber-500 text-white w-8 h-8 rounded mx-1"><i class="fas fa-edit"></i></button>
-                                                <button class="bg-slate-800 text-white w-8 h-8 r
+                                                <button class="bg-slate-800 text-white w-8 h-8 rounded mx-1"><i class="fas fa-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MENU 4: BANK MATERI -->
+                <div id="menu-materi" class="panel-content hide-section fade-in">
+                    <div class="flex justify-between items-end mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800">Bank Materi Pelajaran</h2>
+                            <p class="text-slate-500 text-sm mt-1">Akses file materi Word, Excel, PPT, Video, Gambar.</p>
+                        </div>
+                        <button class="admin-guru-only bg-primary hover:bg-primaryDark text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition flex items-center gap-2">
+                            <i class="fas fa-cloud-upload-alt"></i> Upload Materi Baru
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Hari/Tanggal/Tahun</th>
+                                    <th>Judul Materi</th>
+                                    <th>Tipe File</th>
+                                    <th>Pengunggah</th>
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>[Hari, Tgl, Tahun]</td>
+                                    <td class="font-semibold text-slate-800">[Judul Materi Pembelajaran]</td>
+                                    <td><i class="fas fa-file-word text-blue-600 mr-2"></i> Word Document</td>
+                                    <td>[Nama Guru]</td>
+                                    <td class="text-center">
+                                        <button class="bg-blue-500 hover:bg-blue-600 text-white w-8 h-8 rounded mx-1" title="Download"><i class="fas fa-download"></i></button>
+                                        <button class="admin-guru-only bg-emerald-500 hover:bg-emerald-600 text-white w-8 h-8 rounded mx-1" title="Save Info"><i class="fas fa-save"></i></button>
+                                        <button class="admin-guru-only bg-amber-500 text-white w-8 h-8 rounded mx-1" title="Edit"><i class="fas fa-edit"></i></button>
+                                        <button class="admin-guru-only bg-slate-800 text-white w-8 h-8 rounded mx-1" title="Hapus"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>[Hari, Tgl, Tahun]</td>
+                                    <td class="font-semibold text-slate-800">[Judul Presentasi]</td>
+                                    <td><i class="fas fa-file-powerpoint text-orange-500 mr-2"></i> PowerPoint</td>
+                                    <td>[Nama Guru]</td>
+                                    <td class="text-center">
+                                        <button class="bg-blue-500 hover:bg-blue-600 text-white w-8 h-8 rounded mx-1"><i class="fas fa-download"></i></button>
+                                        <button class="admin-guru-only bg-emerald-500 text-white w-8 h-8 rounded mx-1"><i class="fas fa-save"></i></button>
+                                        <button class="admin-guru-only bg-amber-500 text-white w-8 h-8 rounded mx-1"><i class="fas fa-edit"></i></button>
+                                        <button class="admin-guru-only bg-slate-800 text-white w-8 h-8 rounded mx-1"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- MENU 5: PORTAL UJIAN (PRE-EXAM & RUNNING) -->
+                <div id="menu-ujian" class="panel-content hide-section fade-in">
+                    
+                    <!-- Pre-Exam View -->
+                    <div id="exam-lobby" class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 text-center max-w-2xl mx-auto mt-10">
+                        <i class="fas fa-file-signature text-6xl text-primary mb-6"></i>
+                        <h2 class="text-3xl font-bold text-slate-800 mb-2">Lembar Ujian Elektronik</h2>
+                        <p class="text-slate-500 mb-6">Ujian akan mengaktifkan sistem keamanan ketat (Anti-Foto, Anti-Rekam, Kunci Tab).</p>
+                        
+                        <div class="bg-slate-50 p-4 rounded-lg text-left border border-slate-200 mb-8 space-y-2 text-sm text-slate-700">
+                            <p><strong>Mata Pelajaran:</strong> [Nama Ujian]</p>
+                            <p><strong>Waktu Ditetapkan Guru:</strong> <span id="set-duration">60</span> Menit</p>
+                            <p><strong>Jumlah Soal:</strong> 4 Soal (3 Pilihan Berganda, 1 Isian)</p>
+                        </div>
+                        
+                        <button onclick="mulaiUjian()" class="bg-primary hover:bg-primaryDark text-white font-bold py-4 px-10 rounded-full shadow-lg transition-transform transform hover:scale-105">
+                            MULAI KERJAKAN SOAL
+                        </button>
+                    </div>
+
+                    <!-- Exam Running View -->
+                    <div id="exam-running" class="hide-section max-w-4xl mx-auto prevent-select pb-20">
+                        
+                        <form id="form-ujian" class="space-y-6">
+                            
+                            <!-- Pilihan Ganda 1-3 -->
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                                <p class="font-bold text-slate-800 mb-4 text-lg">1. [Input teks soal pilihan berganda pertama oleh guru...]</p>
+                                <div class="space-y-3 pl-2">
+                                    <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition">
+                                        <input type="radio" name="soal1" value="A" class="w-5 h-5 text-primary"> <span class="text-slate-700">A. [Opsi Jawaban A]</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition">
+                                        <input type="radio" name="soal1" value="B" class="w-5 h-5 text-primary"> <span class="text-slate-700">B. [Opsi Jawaban B]</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition">
+                                        <input type="radio" name="soal1" value="C" class="w-5 h-5 text-primary"> <span class="text-slate-700">C. [Opsi Jawaban C]</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Repeat PG Box for Demo -->
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                                <p class="font-bold text-slate-800 mb-4 text-lg">2. [Input teks soal pilihan berganda kedua oleh guru...]</p>
+                                <div class="space-y-3 pl-2">
+                                    <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer"><input type="radio" name="soal2" value="A" class="w-5 h-5 text-primary"> <span class="text-slate-700">A. [Opsi]</span></label>
+                                    <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer"><input type="radio" name="soal2" value="B" class="w-5 h-5 text-primary"> <span class="text-slate-700">B. [Opsi]</span></label>
+                                    <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer"><input type="radio" name="soal2" value="C" class="w-5 h-5 text-primary"> <span class="text-slate-700">C. [Opsi]</span></label>
+                                </div>
+                            </div>
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                                <p class="font-bold text-slate-800 mb-4 text-lg">3. [Input teks soal pilihan berganda ketiga oleh guru...]</p>
+                                <div class="space-y-3 pl-2">
+                                    <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer"><input type="radio" name="soal3" value="A" class="w-5 h-5 text-primary"> <span class="text-slate-700">A. [Opsi]</span></label>
+                                    <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer"><input type="radio" name="soal3" value="B" class="w-5 h-5 text-primary"> <span class="text-slate-700">B. [Opsi]</span></label>
+                                    <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer"><input type="radio" name="soal3" value="C" class="w-5 h-5 text-primary"> <span class="text-slate-700">C. [Opsi]</span></label>
+                                </div>
+                            </div>
+
+                            <!-- Soal Isian -->
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                                <p class="font-bold text-slate-800 mb-4 text-lg">4. [Input teks soal ISIAN oleh guru...]</p>
+                                <textarea name="soal4" class="w-full border border-slate-300 rounded-lg p-4 h-32 focus:ring-2 focus:ring-primary outline-none text-slate-700" placeholder="Ketik jawaban di sini..."></textarea>
+                            </div>
+
+                            <button type="button" onclick="kumpulkanUjian()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-lg py-5 rounded-xl shadow-lg transition-transform transform hover:scale-[1.01] flex justify-center items-center gap-3">
+                                <i class="fas fa-check-circle text-2xl"></i> SIMPAN JAWABANNYA
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- MENU 6: LAPORAN NILAI (ADMIN/GURU ONLY) -->
+                <div id="menu-laporan" class="panel-content hide-section fade-in">
+                    <div class="flex justify-between items-end mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800">Laporan Otomatis Nilai Ujian</h2>
+                            <p class="text-slate-500 text-sm mt-1">Kalkulasi 4 Soal (Skala 100).</p>
+                        </div>
+                        <button onclick="exportLaporan()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition flex items-center gap-2">
+                            <i class="fas fa-file-excel"></i> Ekspor ke Excel (CSV)
+                        </button>
+                    </div>
+
+                    <!-- Layout Nilai Terbaru (Mockup) -->
+                    <div id="laporan-hasil-terbaru" class="hide-section mb-6 bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl shadow-lg p-6 text-white flex justify-between items-center">
+                        <div>
+                            <p class="text-slate-400 text-sm uppercase tracking-wider font-bold mb-1">Hasil Ujian Terakhir (Simulasi)</p>
+                            <h3 class="text-2xl font-bold" id="lap-nama">[Nama Siswa]</h3>
+                        </div>
+                        <div class="flex gap-8 text-center">
+                            <div><p class="text-slate-400 text-xs uppercase">Benar</p><p class="text-2xl font-bold text-emerald-400" id="lap-benar">0</p></div>
+                            <div><p class="text-slate-400 text-xs uppercase">Salah</p><p class="text-2xl font-bold text-red-400" id="lap-salah">0</p></div>
+                            <div class="border-l border-white/20 pl-8"><p class="text-slate-400 text-xs uppercase">Nilai Akhir</p><p class="text-4xl font-bold text-primary" id="lap-nilai">0</p></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Hari/Tgl</th>
+                                    <th>Nama Siswa</th>
+                                    <th>Mata Ujian</th>
+                                    <th>Benar</th>
+                                    <th>Salah</th>
+                                    <th>Nilai (100)</th>
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>[Tgl]</td>
+                                    <td>[Nama Siswa]</td>
+                                    <td>[Mata Ujian]</td>
+                                    <td>[Benar]</td>
+                                    <td>[Salah]</td>
+                                    <td class="font-bold text-primary">[Nilai]</td>
+                                    <td class="text-center">
+                                        <button class="bg-amber-500 text-white w-8 h-8 rounded mx-1"><i class="fas fa-edit"></i></button>
+                                        <button class="bg-slate-800 text-white w-8 h-8 rounded mx-1"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- AUDIO ANTI-CHEAT (Synthesizer/Oscillator agar mandiri tanpa file mp3) -->
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function mainkanAlarmCurang() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime); // Frekuensi tinggi
+            osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.5);
+            
+            gain.gain.setValueAtTime(1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 1);
+        }
+    </script>
+
+    <!-- LOGIKA SISTEM JAVASCRIPT -->
+    <script>
+        // State Variabel
+        let currentUserRole = '';
+        let currentUserName = '';
+        let isUjianAktif = false;
+        let timerInterval;
+
+        // --- SISTEM LOGIN & HAK AKSES ---
+        function toggleTeacherSelect() {
+            const role = document.getElementById('login-role').value;
+            document.getElementById('teacher-select-group').classList.toggle('hide-section', role !== 'guru');
+            document.getElementById('admin-select-group').classList.toggle('hide-section', role !== 'admin');
+            document.getElementById('login-username').placeholder = (role === 'siswa') ? 'Masukkan NIS Siswa' : 'Masukkan Username/NIP';
+        }
+
+        function prosesLogin() {
+            currentUserRole = document.getElementById('login-role').value;
+            
+            // Set Display Name
+            if (currentUserRole === 'guru') currentUserName = document.getElementById('login-teacher').value;
+            else if (currentUserRole === 'admin') currentUserName = document.getElementById('login-admin').value;
+            else currentUserName = document.getElementById('login-username').value || "Siswa Assisi";
+
+            if(currentUserRole === 'siswa' && !currentUserName) {
+                alert("Harap masukkan NIS/Username!"); return;
+            }
+
+            // Atur UI Dashboard
+            document.getElementById('display-name').innerText = currentUserName;
+            document.getElementById('badge-role').innerText = currentUserRole;
+            
+            // Konfigurasi Hak Akses Elemen (Tampilkan khusus admin/guru)
+            const staffElements = document.querySelectorAll('.admin-guru-only');
+            staffElements.forEach(el => {
+                if (currentUserRole === 'siswa') el.classList.add('hide-section');
+                else el.classList.remove('hide-section');
+            });
+
+            // Transisi View
+            document.getElementById('view-login').classList.add('hide-section');
+            document.getElementById('view-dashboard').classList.remove('hide-section');
+            
+            // Default Menu
+            navigasi('menu-home', document.querySelector('.nav-btn'));
+        }
+
+        function prosesLogout() {
+            if (isUjianAktif) {
+                picuPelanggaran("DILARANG KELUAR SISTEM SAAT UJIAN BERLANGSUNG!");
+                return;
+            }
+            location.reload();
+        }
+
+        // --- NAVIGASI SPA ---
+        function navigasi(menuId, btnElement) {
+            // Cek Kunci Ujian
+            if (isUjianAktif && menuId !== 'menu-ujian') {
+                picuPelanggaran("PELANGGARAN: Anda mencoba kembali ke HOME/Menu saat Ujian!");
+                return;
+            }
+
+            document.querySelectorAll('.panel-content').forEach(el => el.classList.add('hide-section'));
+            document.getElementById(menuId).classList.remove('hide-section');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-red-50', 'text-primary');
+                btn.classList.add('text-slate-600');
+            });
+            if(btnElement) {
+                btnElement.classList.remove('text-slate-600');
+                btnElement.classList.add('bg-red-50', 'text-primary');
+            }
+        }
+
+        // --- SISTEM UJIAN & TIMER ---
+        function mulaiUjian() {
+            // Minta Fullscreen (opsional tapi profesional)
+            if (document.documentElement.requestFullscreen) { document.documentElement.requestFullscreen().catch(e => console.log(e)); }
+
+            document.getElementById('exam-lobby').classList.add('hide-section');
+            document.getElementById('exam-running').classList.remove('hide-section');
+            document.getElementById('topbar-warning').classList.remove('hide-section');
+            
+            isUjianAktif = true;
+            
+            let totalDetik = parseInt(document.getElementById('set-duration').innerText) * 60;
+            const display = document.getElementById('timer-display');
+
+            timerInterval = setInterval(() => {
+                let m = Math.floor(totalDetik / 60);
+                let s = totalDetik % 60;
+                display.innerText = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
+                
+                if (totalDetik <= 0) {
+                    clearInterval(timerInterval);
+                    alert("WAKTU HABIS! Sistem menyimpan jawaban secara otomatis.");
+                    kumpulkanUjian();
+                }
+                totalDetik--;
+            }, 1000);
+        }
+
+        function kumpulkanUjian() {
+            isUjianAktif = false;
+            clearInterval(timerInterval);
+            document.getElementById('topbar-warning').classList.add('hide-section');
+            if (document.exitFullscreen) { document.exitFullscreen().catch(e=>console.log(e)); }
+
+            // Logika Laporan Otomatis (4 Soal = 100. Per soal bobot 25)
+            const form = document.getElementById('form-ujian');
+            const formData = new FormData(form);
+            
+            let benar = 0; let salah = 0;
+            
+            // Simulasi hitung sederhana (menganggap setiap input yang terisi adalah benar untuk demo UI)
+            for(let i=1; i<=4; i++) {
+                let jwb = formData.get('soal'+i);
+                if (jwb && jwb.trim() !== '') benar++;
+                else salah++;
+            }
+            let nilai = benar * 25;
+
+            // Render ke UI Laporan
+            document.getElementById('lap-nama').innerText = currentUserName;
+            document.getElementById('lap-benar').innerText = benar;
+            document.getElementById('lap-salah').innerText = salah;
+            document.getElementById('lap-nilai').innerText = nilai;
+            
+            // Pindah View
+            alert("Ujian Selesai! Mengarahkan ke halaman laporan nilai...");
+            
+            // Jika siswa, buka akses ke panel laporan (override sifat hide default)
+            document.getElementById('menu-laporan').classList.remove('hide-section');
+            document.getElementById('laporan-hasil-terbaru').classList.remove('hide-section');
+            navigasi('menu-laporan', null);
+            document.getElementById('exam-lobby').classList.remove('hide-section');
+            document.getElementById('exam-running').classList.add('hide-section');
+        }
+
+        // --- SISTEM ANTI CHEAT KETAT ---
+        function picuPelanggaran(pesan) {
+            mainkanAlarmCurang();
+            alert("🚨 " + pesan);
+        }
+
+        // 1. Deteksi Pindah Tab / Layar Mati (Blur & Visibility)
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden && isUjianAktif) {
+                picuPelanggaran("SISTEM MENDETEKSI PERPINDAHAN TAB / LAYAR KELUAR! Pelanggaran dicatat.");
+            }
+        });
+        window.addEventListener("blur", () => {
+            if (isUjianAktif) picuPelanggaran("PERINGATAN: Jangan membuka aplikasi lain selama ujian!");
+        });
+
+        // 2. Blokir Klik Kanan (Anti Inspect Element)
+        document.addEventListener("contextmenu", (e) => {
+            if (isUjianAktif) {
+                e.preventDefault();
+                picuPelanggaran("Klik kanan (Inspect/Copy) dikunci selama ujian.");
+            }
+        });
+
+        // 3. Blokir Tombol Keyboard (Screenshot, Copy, Save, Print)
+        document.addEventListener("keydown", (e) => {
+            if (isUjianAktif) {
+                if (e.key === 'PrintScreen' || (e.ctrlKey && ['c', 'v', 'p', 's'].includes(e.key.toLowerCase()))) {
+                    e.preventDefault();
+                    navigator.clipboard.writeText(''); // Kosongkan memori clipboard paksa
+                    picuPelanggaran("TINDAKAN ILEGAL: Fitur Screenshot, Copy-Paste, dan Print dinonaktifkan!");
+                }
+            }
+        });
+
+        // --- EXPORT LAPORAN EXCEL (CSV) ---
+        function exportLaporan() {
+            const dataNilai = [
+                ["Hari/Tanggal", "Nama Siswa", "Mata Ujian", "Benar", "Salah", "Nilai Akhir"],
+                [new Date().toLocaleDateString('id-ID'), currentUserName, "Ujian Simulasi", document.getElementById('lap-benar').innerText, document.getElementById('lap-salah').innerText, document.getElementById('lap-nilai').innerText]
+            ];
+            
+            let csvContent = "data:text/csv;charset=utf-8," + dataNilai.map(e => e.join(",")).join("\n");
+            let encodedUri = encodeURI(csvContent);
+            let link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "Laporan_Ujian_Assisi.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
