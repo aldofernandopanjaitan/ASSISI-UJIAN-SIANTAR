@@ -3,480 +3,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMK SWASTA ASSISI - Portal Akademik Modern</title>
-    <!-- Tailwind CSS untuk Desain Modern & Profesional -->
+    <title>Portal Akademik & Ujian - SMK SWASTA ASSISI</title>
+    <!-- Tailwind CSS untuk desain profesional & estetik -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
-        .transition-all { transition: all 0.3s ease; }
-    </style>
-</head>
-<body class="text-slate-800 antialiased selection:bg-red-500 selection:text-white">
-
-    <!-- HEADER / NAVBAR -->
-    <header class="bg-gradient-to-r from-red-800 to-red-900 text-white shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="bg-white p-2 rounded-xl shadow-md text-red-800 font-bold text-xl flex items-center justify-center w-12 h-12">
-                    <i class="fa-solid fa-school"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold tracking-wide">SMK SWASTA ASSISI</h1>
-                    <p class="text-xs text-red-200">Portal Akademik & Ujian Terpadu</p>
-                </div>
-            </div>
-            <div id="user-nav-status" class="hidden flex items-center space-x-4">
-                <span id="nav-username" class="text-sm font-medium bg-red-950 px-3 py-1 rounded-full border border-red-700"></span>
-                <button onclick="logout()" class="bg-white text-red-800 hover:bg-red-100 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all shadow">
-                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- HALAMAN UTAMA / LOGIN -->
-    <main id="app-container" class="max-w-7xl mx-auto px-4 py-8">
-        
-        <!-- SECTION: LOGIN SELECTION -->
-        <section id="login-section" class="max-w-md mx-auto bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden mt-6">
-            <div class="bg-red-800 p-6 text-white text-center">
-                <h2 class="text-2xl font-bold">Selamat Datang</h2>
-                <p class="text-sm text-red-200 mt-1">Silakan masuk sesuai hak akses Anda</p>
-            </div>
-            <div class="p-6 space-y-4">
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Pilih Role Akses</label>
-                    <select id="login-role" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:outline-none">
-                        <option value="admin">Admin Sekolah</option>
-                        <option value="guru">Guru Pengajar / Pengawas</option>
-                        <option value="siswa">Siswa</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Username / ID</label>
-                    <input type="text" id="login-user" placeholder="Masukkan ID / Nama Pengguna" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
-                    <input type="password" id="login-pass" placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:outline-none">
-                </div>
-                <button onclick="handleLogin()" class="w-full bg-red-800 hover:bg-red-900 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-red-800/20">
-                    Masuk Sistem
-                </button>
-            </div>
-        </section>
-
-        <!-- DASHBOARD UTAMA (TERSEMBUNYI SEBELUM LOGIN) -->
-        <div id="dashboard-section" class="hidden space-y-6">
-            
-            <!-- TAB MENU NAVIGASI DASHBOARD -->
-            <div class="flex flex-wrap gap-2 bg-white p-3 rounded-2xl shadow-sm border border-slate-200">
-                <button onclick="switchTab('jadwal-ujian')" class="tab-btn px-4 py-2 rounded-xl font-semibold text-sm bg-red-800 text-white transition-all"><i class="fa-solid fa-calendar-days mr-2"></i>Jadwal Ujian</button>
-                <button onclick="switchTab('jadwal-kbm')" class="tab-btn px-4 py-2 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-100 transition-all"><i class="fa-solid fa-book-open mr-2"></i>Jadwal KBM</button>
-                <button onclick="switchTab('presensi')" class="tab-btn px-4 py-2 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-100 transition-all"><i class="fa-solid fa-qrcode mr-2"></i>Presensi & QR</button>
-                <button onclick="switchTab('materi')" class="tab-btn px-4 py-2 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-100 transition-all"><i class="fa-solid fa-file-arrow-up mr-2"></i>Materi</button>
-                <button onclick="switchTab('ujian')" class="tab-btn px-4 py-2 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-100 transition-all"><i class="fa-solid fa-laptop-code mr-2"></i>Ujian Online</button>
-            </div>
-
-            <!-- TAB 1: JADWAL UJIAN SEKOLAH -->
-            <div id="tab-jadwal-ujian" class="tab-content space-y-4">
-                <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-                    <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-calendar-check text-red-800 mr-2"></i>Jadwal Ujian Sekolah</h3>
-                    <button onclick="openModal('modal-jadwal-ujian')" class="admin-only bg-red-800 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-red-900 shadow"><i class="fa-solid fa-plus mr-1"></i> Tambah Jadwal Ujian</button>
-                </div>
-                <!-- Contoh Tampilan Horizontal Tanggal (Referensi Gambar 3) -->
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex gap-2 overflow-x-auto">
-                    <div class="flex-shrink-0 bg-slate-100 border border-slate-200 px-4 py-3 rounded-xl text-center cursor-pointer hover:bg-red-50"><span class="block text-xs text-slate-500">Sen</span><span class="text-lg font-bold">9</span></div>
-                    <div class="flex-shrink-0 bg-red-800 text-white px-4 py-3 rounded-xl text-center cursor-pointer shadow"><span class="block text-xs text-red-200">Sel</span><span class="text-lg font-bold">10</span></div>
-                    <div class="flex-shrink-0 bg-slate-100 border border-slate-200 px-4 py-3 rounded-xl text-center cursor-pointer hover:bg-red-50"><span class="block text-xs text-slate-500">Rab</span><span class="text-lg font-bold">11</span></div>
-                    <div class="flex-shrink-0 bg-slate-100 border border-slate-200 px-4 py-3 rounded-xl text-center cursor-pointer hover:bg-red-50"><span class="block text-xs text-slate-500">Kam</span><span class="text-lg font-bold">12</span></div>
-                    <div class="flex-shrink-0 bg-slate-100 border border-slate-200 px-4 py-3 rounded-xl text-center cursor-pointer hover:bg-red-50"><span class="block text-xs text-slate-500">Jum</span><span class="text-lg font-bold">13</span></div>
-                </div>
-                <!-- Container List Jadwal Ujian -->
-                <div id="list-jadwal-ujian" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Item Contoh -->
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-                        <div class="flex justify-between items-start">
-                            <span class="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full">Selasa, 10 November 2026</span>
-                            <span class="text-xs font-semibold text-slate-500">Ruang: 05 | Sesi: 1</span>
-                        </div>
-                        <h4 class="text-base font-bold text-slate-900">UJIAN: MATEMATIKA</h4>
-                        <div class="text-sm space-y-1 text-slate-600">
-                            <p><i class="fa-regular fa-clock w-5 text-red-800"></i> Jam: 08:00 - 10:00 WIB</p>
-                            <p><i class="fa-solid fa-location-dot w-5 text-red-800"></i> Lokasi: SMK SWASTA ASSISI</p>
-                            <p><i class="fa-solid fa-graduation-cap w-5 text-red-800"></i> Kelas: 10 RPL, 10 TB, 10 AK</p>
-                            <p><i class="fa-solid fa-users w-5 text-red-800"></i> Jumlah Siswa: 35 Orang</p>
-                            <p><i class="fa-solid fa-user-tie w-5 text-red-800"></i> Pengawas: Dra. Maria Situmorang</p>
-                        </div>
-                        <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100 admin-only">
-                            <button onclick="editItem('ujian', 0)" class="bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-amber-600"><i class="fa-solid fa-pen-to-square mr-1"></i> Edit</button>
-                            <button onclick="deleteItem('ujian', 0)" class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-red-700"><i class="fa-solid fa-trash mr-1"></i> Hapus</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 2: JADWAL KBM SEKOLAH -->
-            <div id="tab-jadwal-kbm" class="tab-content hidden space-y-4">
-                <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-                    <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-book text-red-800 mr-2"></i>Jadwal KBM Sekolah</h3>
-                    <button onclick="openModal('modal-jadwal-kbm')" class="admin-only bg-red-800 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-red-900 shadow"><i class="fa-solid fa-plus mr-1"></i> Tambah Jadwal KBM</button>
-                </div>
-                <div id="list-jadwal-kbm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-                        <div class="flex justify-between items-start">
-                            <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Rabu, 11 November 2026</span>
-                            <span class="text-xs font-semibold text-slate-500">Les ke-1 s.d 3</span>
-                        </div>
-                        <h4 class="text-base font-bold text-slate-900">MATAPELAJARAN: MATEMATIKA</h4>
-                        <div class="text-sm space-y-1 text-slate-600">
-                            <p><i class="fa-regular fa-clock w-5 text-red-800"></i> Jam: 07:30 - 09:15 WIB</p>
-                            <p><i class="fa-solid fa-location-dot w-5 text-red-800"></i> Lokasi: SMK SWASTA ASSISI</p>
-                            <p><i class="fa-solid fa-graduation-cap w-5 text-red-800"></i> Kelas: 11 RPL, 11 TB, 11 AK</p>
-                            <p><i class="fa-solid fa-users w-5 text-red-800"></i> Jumlah Siswa: 30 Orang</p>
-                            <p><i class="fa-solid fa-chalkboard-user w-5 text-red-800"></i> Pengajar: Bpk. J. Sinaga, S.Pd</p>
-                        </div>
-                        <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100 admin-only">
-                            <button onclick="editItem('kbm', 0)" class="bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-amber-600"><i class="fa-solid fa-pen-to-square mr-1"></i> Edit</button>
-                            <button onclick="deleteItem('kbm', 0)" class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-red-700"><i class="fa-solid fa-trash mr-1"></i> Hapus</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 3: PRESENSI & SCAN QR -->
-            <div id="tab-presensi" class="tab-content hidden space-y-4">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center space-y-4">
-                    <h3 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-qrcode text-red-800 mr-2"></i>Scan QR Code Presensi Ujian & KBM</h3>
-                    <p class="text-sm text-slate-600 max-w-md mx-auto">Arahkan kamera perangkat Anda atau tunjukkan QR Code identitas Anda kepada pengawas/guru untuk merekam kehadiran secara otomatis.</p>
-                    <div class="w-48 h-48 mx-auto bg-slate-100 border-4 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden">
-                        <i class="fa-solid fa-camera text-4xl text-slate-400 mb-2"></i>
-                        <span class="text-xs font-semibold text-slate-500">Kamera Scanner Aktif</span>
-                        <div class="absolute inset-0 bg-red-800/10 animate-pulse"></div>
-                    </div>
-                    <button onclick="alert('Presensi Berhasil Direkam!')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-2.5 rounded-xl shadow transition-all">
-                        <i class="fa-solid fa-check mr-1"></i> Simulasi Scan QR Hadir
-                    </button>
-                </div>
-            </div>
-
-            <!-- TAB 4: MATERI PELAJARAN -->
-            <div id="tab-materi" class="tab-content hidden space-y-4">
-                <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-                    <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-folder-open text-red-800 mr-2"></i>Materi Pembelajaran</h3>
-                    <button onclick="openModal('modal-materi')" class="admin-guru-only bg-red-800 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-red-900 shadow"><i class="fa-solid fa-upload mr-1"></i> Upload Materi Baru</button>
-                </div>
-                <div id="list-materi" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-                        <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">Rabu, 11 November 2026</span>
-                        <h4 class="text-base font-bold text-slate-900">Judul: Hidup Sehat & Bugar</h4>
-                        <div class="text-sm space-y-1 text-slate-600">
-                            <p><i class="fa-solid fa-book-bookmark w-5 text-red-800"></i> Mapel: IPA</p>
-                            <p><i class="fa-solid fa-graduation-cap w-5 text-red-800"></i> Kelas: 10 RPL, 10 TB, 10 AK</p>
-                            <p><i class="fa-solid fa-user-tie w-5 text-red-800"></i> Guru: Ibu R. Br. Ginting, S.Pd</p>
-                            <p><i class="fa-solid fa-file-arrow-down w-5 text-red-800"></i> File: <a href="#" class="text-red-600 underline font-semibold">Materi_HidupSehat.docx</a></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 5: UJIAN ONLINE -->
-            <div id="tab-ujian" class="tab-content hidden space-y-4">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-6">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-4 border-b border-slate-100 gap-4">
-                        <div>
-                            <span class="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full">Ujian Online Aktif</span>
-                            <h3 class="text-xl font-bold text-slate-900 mt-1">Mata Pelajaran: Pendidikan Jasmani & Kesehatan (IPA)</h3>
-                        </div>
-                        <div class="bg-amber-50 border border-amber-200 px-4 py-2 rounded-xl flex items-center space-x-3">
-                            <i class="fa-solid fa-stopwatch text-amber-600 text-xl"></i>
-                            <div>
-                                <span class="block text-xs text-amber-700 font-medium">Sisa Waktu Ujian</span>
-                                <span id="exam-timer" class="text-lg font-bold text-amber-800">20:00</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- AREA SOAL UJIAN -->
-                    <div id="exam-form-area" class="space-y-6">
-                        <!-- Soal Pilihan Berganda -->
-                        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-                            <p class="font-bold text-slate-900">1. Apa arti dari hidup sehat dari guru?</p>
-                            <div class="space-y-2 text-sm">
-                                <label class="flex items-center space-x-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-red-500"><input type="radio" name="q1" value="A"> <span>A. hidup sehat</span></label>
-                                <label class="flex items-center space-x-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-red-500"><input type="radio" name="q1" value="B"> <span>B. Hidup kotor</span></label>
-                                <label class="flex items-center space-x-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-red-500"><input type="radio" name="q1" value="C"> <span>C. hidup malas</span></label>
-                                <label class="flex items-center space-x-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-red-500"><input type="radio" name="q1" value="D"> <span>D. Hidup Rajin</span></label>
-                                <label class="flex items-center space-x-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-red-500"><input type="radio" name="q1" value="E"> <span>E. Hidup suka</span></label>
-                            </div>
-                            <button onclick="checkMultipleChoice(this, 'C')" class="bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-slate-900">Periksa Jawaban</button>
-                            <div class="result-box hidden mt-2 p-3 rounded-xl text-sm font-semibold"></div>
-                        </div>
-
-                        <!-- Soal Essay / Isian -->
-                        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-                            <p class="font-bold text-slate-900">2. Apa arti hidup sehat menurut anda? Jelaskan secara rinci (100–900 kata).</p>
-                            <textarea rows="6" placeholder="Ketik jawaban essay panjang ke bawah di sini..." class="w-full p-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:outline-none text-sm"></textarea>
-                            <button onclick="checkEssay(this)" class="bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-slate-900">Kirim Essay</button>
-                            <div class="essay-result hidden mt-2 p-3 rounded-xl text-sm font-semibold"></div>
-                        </div>
-
-                        <div class="flex justify-end space-x-3 pt-4">
-                            <button onclick="submitExamManually()" class="bg-red-800 hover:bg-red-900 text-white font-semibold px-6 py-2.5 rounded-xl shadow">Kumpul Jawaban Ujian</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </main>
-
-    <!-- MODAL POPUP ADMIN: TAMBAH/EDIT JADWAL UJIAN -->
-    <div id="modal-jadwal-ujian" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
-            <h3 class="text-lg font-bold text-slate-900">Form Kelola Jadwal Ujian</h3>
-            <div class="space-y-3 text-sm">
-                <div><label class="font-semibold">Nama Ujian</label><input type="text" id="inp-nama-ujian" placeholder="Contoh: MATEMATIKA" class="w-full p-2.5 border rounded-xl"></div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div><label class="font-semibold">Tanggal</label><input type="date" id="inp-tgl-ujian" class="w-full p-2.5 border rounded-xl"></div>
-                    <div><label class="font-semibold">Jam Mulai - Selesai</label><input type="text" id="inp-jam-ujian" placeholder="08:00 - 10:00" class="w-full p-2.5 border rounded-xl"></div>
-                </div>
-                <div><label class="font-semibold">Lokasi</label><input type="text" id="inp-lokasi-ujian" value="SMK SWASTA ASSISI" class="w-full p-2.5 border rounded-xl"></div>
-                <div><label class="font-semibold">Kelas</label><input type="text" id="inp-kelas-ujian" value="10 RPL, 10 TB, 10 AK" class="w-full p-2.5 border rounded-xl"></div>
-                <div class="grid grid-cols-3 gap-2">
-                    <div><label class="font-semibold">Ruang</label><input type="text" id="inp-ruang-ujian" placeholder="1-100" class="w-full p-2.5 border rounded-xl"></div>
-                    <div><label class="font-semibold">Sesi</label><input type="text" id="inp-sesi-ujian" placeholder="1-100" class="w-full p-2.5 border rounded-xl"></div>
-                    <div><label class="font-semibold">Jumlah Siswa</label><input type="text" id="inp-jml-ujian" placeholder="1-100" class="w-full p-2.5 border rounded-xl"></div>
-                </div>
-                <div><label class="font-semibold">Nama Pengawas</label><input type="text" id="inp-pengawas-ujian" placeholder="Nama Pengawas" class="w-full p-2.5 border rounded-xl"></div>
-            </div>
-            <div class="flex justify-end space-x-2 pt-3 border-t">
-                <button onclick="closeModal('modal-jadwal-ujian')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-xl font-semibold hover:bg-slate-300">Kembali</button>
-                <button onclick="saveJadwalUjian()" class="px-4 py-2 bg-red-800 text-white rounded-xl font-semibold hover:bg-red-900">Save</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL POPUP ADMIN: TAMBAH/EDIT JADWAL KBM -->
-    <div id="modal-jadwal-kbm" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
-            <h3 class="text-lg font-bold text-slate-900">Form Kelola Jadwal KBM</h3>
-            <div class="space-y-3 text-sm">
-                <div><label class="font-semibold">Mata Pelajaran</label><input type="text" id="inp-mapel-kbm" placeholder="Contoh: MATEMATIKA" class="w-full p-2.5 border rounded-xl"></div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div><label class="font-semibold">Tanggal</label><input type="date" id="inp-tgl-kbm" class="w-full p-2.5 border rounded-xl"></div>
-                    <div><label class="font-semibold">Jam Les (1-10)</label><input type="text" id="inp-jam-kbm" placeholder="Les 1-3 (07:30)" class="w-full p-2.5 border rounded-xl"></div>
-                </div>
-                <div><label class="font-semibold">Lokasi</label><input type="text" id="inp-lokasi-kbm" value="SMK SWASTA ASSISI" class="w-full p-2.5 border rounded-xl"></div>
-                <div><label class="font-semibold">Kelas</label><input type="text" id="inp-kelas-kbm" value="11 RPL, 11 TB, 11 AK" class="w-full p-2.5 border rounded-xl"></div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div><label class="font-semibold">Jumlah Siswa</label><input type="text" id="inp-jml-kbm" placeholder="1-100" class="w-full p-2.5 border rounded-xl"></div>
-                    <div><label class="font-semibold">Nama Pengajar</label><input type="text" id="inp-pengajar-kbm" placeholder="Nama Guru" class="w-full p-2.5 border rounded-xl"></div>
-                </div>
-            </div>
-            <div class="flex justify-end space-x-2 pt-3 border-t">
-                <button onclick="closeModal('modal-jadwal-kbm')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-xl font-semibold hover:bg-slate-300">Kembali</button>
-                <button onclick="saveJadwalKbm()" class="px-4 py-2 bg-red-800 text-white rounded-xl font-semibold hover:bg-red-900">Save</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL POPUP: UPLOAD MATERI -->
-    <div id="modal-materi" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
-            <h3 class="text-lg font-bold text-slate-900">Form Upload Materi Pembelajaran</h3>
-            <div class="space-y-3 text-sm">
-                <div><label class="font-semibold">Judul Materi</label><input type="text" id="inp-judul-materi" placeholder="Contoh: Hidup Sehat" class="w-full p-2.5 border rounded-xl"></div>
-                <div><label class="font-semibold">Mata Pelajaran (Terpisah dari Kelas)</label><input type="text" id="inp-mapel-materi" placeholder="Contoh: IPA" class="w-full p-2.5 border rounded-xl"></div>
-                <div><label class="font-semibold">Kelas</label><input type="text" id="inp-kelas-materi" value="10 RPL, 10 TB, 10 AK" class="w-full p-2.5 border rounded-xl"></div>
-                <div><label class="font-semibold">Upload File (Word, Excel, PPT, Gambar, Video)</label><input type="file" id="inp-file-materi" class="w-full p-2 border rounded-xl"></div>
-                <div><label class="font-semibold">Materi Oleh (Nama Guru)</label><input type="text" id="inp-guru-materi" placeholder="Nama Guru" class="w-full p-2.5 border rounded-xl"></div>
-            </div>
-            <div class="flex justify-end space-x-2 pt-3 border-t">
-                <button onclick="closeModal('modal-materi')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-xl font-semibold hover:bg-slate-300">Kembali</button>
-                <button onclick="saveMateri()" class="px-4 py-2 bg-red-800 text-white rounded-xl font-semibold hover:bg-red-900">Save & Upload</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- JAVASCRIPT SISTEM -->
+    <!-- FontAwesome untuk Icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
-        let currentRole = '';
-
-        function handleLogin() {
-            const role = document.getElementById('login-role').value;
-            const user = document.getElementById('login-user').value || role.toUpperCase();
-            
-            currentRole = role;
-            document.getElementById('login-section').classList.add('hidden');
-            document.getElementById('dashboard-section').classList.remove('hidden');
-            document.getElementById('user-nav-status').classList.remove('hidden');
-            document.getElementById('nav-username').innerText = `${user} (${role.toUpperCase()})`;
-
-            // Sembunyikan tombol admin jika bukan admin/guru
-            const adminElements = document.querySelectorAll('.admin-only');
-            const adminGuruElements = document.querySelectorAll('.admin-guru-only');
-
-            if(role === 'siswa') {
-                adminElements.forEach(el => el.classList.add('hidden'));
-                adminGuruElements.forEach(el => el.classList.add('hidden'));
-                initAntiCheat(); // Aktifkan sistem keamanan ujian khusus siswa
-            } else if(role === 'guru') {
-                adminElements.forEach(el => el.classList.add('hidden'));
-                adminGuruElements.forEach(el => el.classList.remove('hidden'));
-            } else {
-                adminElements.forEach(el => el.classList.remove('hidden'));
-                adminGuruElements.forEach(el => el.classList.remove('hidden'));
-            }
-
-            startTimer(20 * 60); // Timer ujian 20 menit
-        }
-
-        function logout() {
-            location.reload();
-        }
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('bg-red-800', 'text-white');
-                btn.classList.add('text-slate-600', 'hover:bg-slate-100');
-            });
-            event.currentTarget.classList.add('bg-red-800', 'text-white');
-            event.currentTarget.classList.remove('text-slate-600', 'hover:bg-slate-100');
-        }
-
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.remove('hidden');
-            document.getElementById(modalId).classList.add('flex');
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-            document.getElementById(modalId).classList.remove('flex');
-        }
-
-        // Simulasi Aksi CRUD
-        function saveJadwalUjian() {
-            alert('Jadwal Ujian berhasil disimpan!');
-            closeModal('modal-jadwal-ujian');
-        }
-
-        function saveJadwalKbm() {
-            alert('Jadwal KBM berhasil disimpan!');
-            closeModal('modal-jadwal-kbm');
-        }
-
-        function saveMateri() {
-            alert('Materi berhasil diunggah!');
-            closeModal('modal-materi');
-        }
-
-        function editItem(type, id) {
-            alert(`Mode Edit untuk data ${type} #${id}`);
-            if(type === 'ujian') openModal('modal-jadwal-ujian');
-            if(type === 'kbm') openModal('modal-jadwal-kbm');
-        }
-
-        function deleteItem(type, id) {
-            if(confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                alert('Data berhasil dihapus.');
-            }
-        }
-
-        // Penilaian Pilihan Berganda (Tombol Hijau & Merah Sesuai Permintaan)
-        function checkMultipleChoice(btn, correctAns) {
-            const parent = btn.parentElement;
-            const selected = parent.querySelector('input[type="radio"]:checked');
-            const resultBox = parent.querySelector('.result-box');
-            
-            resultBox.classList.remove('hidden');
-            if(!selected) {
-                resultBox.className = "result-box mt-2 p-3 rounded-xl text-sm font-semibold bg-amber-100 text-amber-800";
-                resultBox.innerText = "Pilih salah satu opsi terlebih dahulu!";
-                return;
-            }
-
-            if(selected.value === correctAns) {
-                resultBox.className = "result-box mt-2 p-3 rounded-xl text-sm font-semibold bg-emerald-600 text-white";
-                resultBox.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Jawaban BENAR: C. hidup malas (Sesuai Kunci Admin)`;
-            } else {
-                resultBox.className = "result-box mt-2 p-3 rounded-xl text-sm font-semibold bg-red-600 text-white";
-                resultBox.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i> Jawaban SALAH: E. Hidup suka (Kunci Benar: C)`;
-            }
-        }
-
-        function checkEssay(btn) {
-            const parent = btn.parentElement;
-            const textVal = parent.querySelector('textarea').value;
-            const resultBox = parent.querySelector('.essay-result');
-            
-            resultBox.classList.remove('hidden');
-            if(textVal.length < 10) {
-                resultBox.className = "essay-result mt-2 p-3 rounded-xl text-sm font-semibold bg-amber-100 text-amber-800";
-                resultBox.innerText = "Jawaban terlalu singkat, mohon isi lebih lengkap.";
-                return;
-            }
-
-            resultBox.className = "essay-result mt-2 p-3 rounded-xl text-sm font-semibold bg-emerald-600 text-white";
-            resultBox.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Jawaban Essay Disimpan. <br>Kunci Benar dari Admin: Hidup adalah suatu proses keseriusan dalam mencapai tujuan.`;
-        }
-
-        // TIMER OTOMATIS & KUMPUL OTOMATIS
-        function startTimer(duration) {
-            let timer = duration, minutes, seconds;
-            const display = document.getElementById('exam-timer');
-            
-            const interval = setInterval(function () {
-                minutes = parseInt(timer / 60, 10);
-                seconds = parseInt(timer % 60, 10);
-
-                minutes = minutes < 10 ? "0" + minutes : minutes;
-                seconds = seconds < 10 ? "0" + seconds : seconds;
-
-                display.textContent = minutes + ":" + seconds;
-
-                // Jika tinggal 1 menit (60 detik), peringatkan otomatis
-                if (timer === 60) {
-                    alert('Peringatan! Waktu ujian tinggal 1 menit lagi dan akan dikumpulkan otomatis.');
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: '#e3242b', primaryDark: '#b91c22', surface: '#f8fafc' },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
                 }
-
-                if (--timer < 0) {
-                    clearInterval(interval);
-                    alert('Waktu ujian telah habis! Jawaban Anda dikumpulkan otomatis oleh sistem.');
-                    submitExamManually();
-                }
-            }, 1000);
-        }
-
-        function submitExamManually() {
-            alert('Ujian berhasil dikumpulkan dan dikirim ke database guru & admin.');
-            switchTab('jadwal-ujian');
-        }
-
-        // SISTEM KEAMANAN ANTI-CHEAT (Deteksi Keluar Layar / Tab)
-        function initAntiCheat() {
-            document.addEventListener('visibilitychange', function() {
-                if (document.hidden) {
-                    playAlarmSound();
-                    alert('PERINGATAN KEAMANAN!\nAnda terdeteksi keluar dari halaman soal atau mencoba mencari jawaban dari AI/Google!\nTindakan ini dicatat oleh pengawas.');
-                }
-            });
-        }
-
-        function playAlarmSound() {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            osc.type = 'sine';
-            osc.frequency.value = 587.33; // Nada D5 peringatan
-            osc.connect(ctx.destination);
-            osc.start();
-            setTimeout(() => { osc.stop(); }, 500);
+            }
         }
     </script>
-</body>
-</html>
+    <style>
+        body { -webkit-font-smoothing: antialiased; background-color: #f1f5f9; }
+        .hide-section { display: none !important; }
+        .prevent-select { user-select: none; -webkit-user-select: none; }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        
+        /* Animasi Transisi Halus */
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Styling Tabel Estetik */
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        th { background-color: #f8fafc; color: #475569; font-weight: 600; text-transform: uppercase; font-size: 12px; padding: 12px 16px; border-bottom: 2px solid #e2e8f0; }
+        td { padding: 14px 16px; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #334155; background: white; }
+        tr:hover td { background-color: #f8fafc; }
+        
+        /* Scanner Animasi */
+        .scan-line { width: 100%; height: 2px; background: #e3242b; position: absolute; top: 0; box-shadow: 0 0 10px #e3242b; animation: scanning 2s infinite linear; }
+        @keyframes scanning { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- ================= 1. HALAMAN LOGIN ================= -->
+    <div id="view-login" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900 p-4 absolute inset-0 z-50 fade-in">
+        <div class="glass-panel p-10 rounded-2xl shadow-2xl w-full max-w-md border-t-8 border-primary relative overflow-hidden">
+            <div class="text-center mb-8">
+                <div class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl shadow-lg">
+                    <i class="fas fa-school"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">SMK SWASTA ASSISI</h2>
+                <p class="text-slate-500 text-sm mt-1">Portal Ujian & Manajemen Akademik</p>
+            </div>
+            
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Hak Akses</label>
+                    <select id="login-role" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition outline-none" onchange="toggleTeacherSelect()">
+                        <option value="siswa">Siswa / Murid</option>
+                        <option value="guru">Guru Pengajar</option>
+                        <option value="admin">Administrator</option>
+                    </select>
+                </div>
+                
+                <div id="admin-select-group" class="hide-section">
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Pilih Admin</label>
+                    <select id="login-admin" class="w-full p-3 border border-slate-300 rounded-lg outline-none">
+                        <option value="Admin 1">Admin 1</option>
+                        <option value="Admin 2">Admin 2</option>
+                        <option value="Admin 3">Admin 3</option>
+                    </select>
+                </div>
+
+                <div id="teacher-select-group" class="hide-section">
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Nama Guru</label>
+                    <select id="login-teacher" class="w-full p-3 border border-slate-300 rounded-lg outline-none">
+                        <option value="Sr.Gaudensia Silalahi">1. Sr.Gaudensia Silalahi</option>
+                        <option value="H.Tindaon">2. H.Tindaon</option>
+                        <option value="P.Tambunan">3. P.Tambunan</option>
+                        <option value="E.Sirait">4. E.Sirait</option>
+                        <option value="E.Silalahi">5. E.Silalahi</option>
+                        <option value="A.Lumbantobing">6. A.Lumbantobing</option>
+                        <option value="M.Haloho">7. M.Haloho</option>
+                        <option value="E.Nainggolan">8. E.Nainggolan</option>
+                        <option value="L.Panggabean">9. L.Panggabean</option>
+                        <option value="E.Gultom">10. E.Gultom</option>
+                        <option value="K.Silitonga">11. K.Silitonga</option>
+                        <option value="O.Nadeak">12. O.Nadeak</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">ID / Username</label>
+                    <input type="text" id="login-username" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary outline-none" placeholder="Masukkan NIS / NIP / Username">
+                </div>
+                
+                <button onclick="prosesLogin()" class="w-full bg-primary hover:bg-primaryDark text-white font-bold py-3.5 px-4 rounded-lg shadow-md transition duration-200 flex items-center justify-center gap-2">
+                    <i class="fas fa-sign-in-alt"></i> MASUK SISTEM
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 2. DASHBOARD APLIKASI ================= -->
+    <div id="view-dashboard" class="hide-section flex h-screen overflow-hidden bg-slate-50">
+        
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="w-64 bg-white border-r border-slate-200 flex flex-col shadow-sm z-20">
+            <div class="p-5 border-b border-slate-100 flex items-center gap-3">
+                <div class="bg-primary text-white p-2 rounded-lg"><i class="fas fa-graduation-cap"></i></div>
+                <div>
+                    <h1 class="font-bold text-slate-800 leading-tight">SMK ASSISI</h1>
+                    <span id="badge-role" class="text-[10px] font-bold bg-slate-100 text-primary px-2 py-0.5 rounded-full uppercase tracking-wider"></span>
+                </div>
+            </div>
+            
+            <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+                <button onclick="navigasi('menu-home', this)" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-primary bg-red-50 transition-colors">
+                    <i class="fas fa-home w-5 text-center"></i> Beranda
+                </button>
+                <button onclick="navigasi('menu-jadwal', this)" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-50 hover:text-primary transition-colors">
+                    <i class="fas fa-calendar-alt w-5 text-center"></i> Jadwal Akademik
+                </button>
+                <button onclick="navigasi('menu-scan', this)" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-50 hover:text-primary transition-colors">
+                    <i class="fas fa-qrcode w-5 text-center"></i> Presensi Scan
+                </button>
+                <button onclick="navigasi('menu-materi', this)" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-50 hover:text-primary transition-colors">
+                    <i class="fas fa-book w-5 text-center"></i> Bank Materi
+                </button>
+                <button onclick="navigasi('menu-ujian', this)" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-50 hover:text-primary transition-colors">
+                    <i class="fas fa-laptop-code w-5 text-center"></i> Portal Ujian
+                </button>
+                
+                <!-- Hanya Admin & Guru -->
+                <button onclick="navigasi('menu-laporan', this)" class="nav-btn admin-guru-only w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-50 hover:text-primary transition-colors">
+                    <i class="fas fa-chart-bar w-5 text-center"></i> Laporan Nilai
+                </button>
+            </nav>
+            
+            <div class="p-4 border-t border-slate-100">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <p id="display-name" class="text-sm font-bold text-slate-800 truncate">Nama User</p>
+                        <p class="text-xs text-slate-500">Tahun 2026/2027</p>
+                    </div>
+                </div>
+                <button onclick="prosesLogout()" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold rounded-lg text-white bg-slate-800 hover:bg-slate-900 transition-colors shadow-sm">
+                    <i class="fas fa-power-off"></i> KELUAR
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN KONTEN -->
+        <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+            
+            <!-- Topbar (Anti Cheat Warning Box) -->
+            <div id="topbar-warning" class="hide-section bg-primary text-white px-6 py-3 flex justify-between items-center shadow-md z-10">
+                <div class="flex items-center gap-3 font-bold">
+                    <i class="fas fa-shield-alt animate-pulse"></i> KEAMANAN UJIAN AKTIF
+                </div>
+                <div class="text-2xl font-mono font-bold bg-black/20 px-4 py-1 rounded-lg border border-white/20">
+                    <span id="timer-display">00:00</span>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-8 relative">
+                
+                <!-- MENU 1: HOME -->
+                <div id="menu-home" class="panel-content fade-in">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+                        <h2 class="text-2xl font-bold text-slate-800 mb-2">Selamat Datang di Portal Terpadu</h2>
+                        <p class="text-slate-500 mb-6">Kelola jadwal, materi, absensi, dan ujian sekolah dalam satu ekosistem.</p>
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg text-sm text-blue-800">
+                            <strong>Informasi Sistem:</strong> Seluruh baris tabel data telah disiapkan dengan format [kosong] agar staf Admin dan Guru dapat menginput secara independen menggunakan tombol Aksi.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MENU 2: JADWAL UJIAN & LES -->
+                <div id="menu-jadwal" class="panel-content hide-section fade-in">
+                    <div class="flex justify-between items-end mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800">Jadwal Ujian & Les (1-10)</h2>
+                            <p class="text-slate-500 text-sm mt-1">Manajemen jadwal kegiatan belajar dan ujian sekolah.</p>
+                        </div>
+                        <button class="admin-guru-only bg-primary hover:bg-primaryDark text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition flex items-center gap-2">
+                            <i class="fas fa-plus"></i> Tambah Jadwal
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Hari/Tanggal/Tahun</th>
+                                    <th>Kategori</th>
+                                    <th>Mapel / Jam Les</th>
+                                    <th>Lokasi / Kelas / Sesi</th>
+                                    <th>Pengajar / Pengawas</th>
+                                    <th class="admin-guru-only text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>[Hari, Tgl, Tahun]</td>
+                                    <td><span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold">UJIAN</span></td>
+                                    <td>[Nama Mapel]</td>
+                                    <td>[Kelas / Ruang / Sesi]</td>
+                                    <td>[Nama Pengawas]</td>
+                                    <td class="admin-guru-only text-center">
+                                        <div class="flex justify-center gap-2">
+                                            <button class="bg-emerald-500 hover:bg-emerald-600 text-white w-8 h-8 rounded flex items-center justify-center" title="Save"><i class="fas fa-save"></i></button>
+                                            <button class="bg-amber-500 hover:bg-amber-600 text-white w-8 h-8 rounded flex items-center justify-center" title="Edit"><i class="fas fa-edit"></i></button>
+                                            <button class="bg-slate-800 hover:bg-slate-900 text-white w-8 h-8 rounded flex items-center justify-center" title="Hapus"><i class="fas fa-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>[Hari, Tgl, Tahun]</td>
+                                    <td><span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold">LES 1-10</span></td>
+                                    <td>[Nama Mapel] - Jam Les: [Jam]</td>
+                                    <td>[Kelas / Lokasi]</td>
+                                    <td>[Nama Pengajar]</td>
+                                    <td class="admin-guru-only text-center">
+                                        <div class="flex justify-center gap-2">
+                                            <button class="bg-emerald-500 text-white w-8 h-8 rounded flex items-center justify-center"><i class="fas fa-save"></i></button>
+                                            <button class="bg-amber-500 text-white w-8 h-8 rounded flex items-center justify-center"><i class="fas fa-edit"></i></button>
+                                            <button class="bg-slate-800 text-white w-8 h-8 rounded flex items-center justify-center"><i class="fas fa-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- MENU 3: PRESENSI SCAN -->
+                <div id="menu-scan" class="panel-content hide-section fade-in">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-6">Scan Presensi Harian & Pengawas</h2>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                        <div class="lg:col-span-1 bg-slate-900 rounded-xl overflow-hidden relative h-64 flex flex-col items-center justify-center border-4 border-slate-800">
+                            <div class="scan-line"></div>
+                            <div class="border-2 border-dashed border-white/30 w-48 h-48 flex items-center justify-center">
+                                <i class="fas fa-camera text-4xl text-white/20"></i>
+                            </div>
+                            <button class="absolute bottom-4 bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold shadow-lg" onclick="alert('Kamera aktif untuk Scan QR Guru/Siswa!')">
+                                Aktifkan Scanner
+                            </button>
+                        </div>
+                        
+                        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                                <h3 class="font-bold text-slate-700">Riwayat Kehadiran</h3>
+                                <div class="admin-guru-only text-sm text-slate-500">Auto-Save Aktif</div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Hari/Tanggal/Tahun</th>
+                                            <th>Nama / Peran</th>
+                                            <th>Tipe Kehadiran</th>
+                                            <th class="admin-guru-only text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>[Hari, Tgl, Tahun] - [Waktu]</td>
+                                            <td>[Nama Guru/Siswa]</td>
+                                            <td><span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs font-bold">PENGAWAS UJIAN</span></td>
+                                            <td class="admin-guru-only text-center">
+                                                <button class="bg-amber-500 text-white w-8 h-8 rounded mx-1"><i class="fas fa-edit"></i></button>
+                                                <button class="bg-slate-800 text-white w-8 h-8 rounded mx-1"><i class="fas fa-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>[Hari, Tgl, Tahun] - [Waktu]</td>
+                                            <td>[Nama Guru/Siswa]</td>
+                                            <td><span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold">KBM HARIAN</span></td>
+                                            <td class="admin-guru-only text-center">
+                                                <button class="bg-amber-500 text-white w-8 h-8 rounded mx-1"><i class="fas fa-edit"></i></button>
+                                                <button class="bg-slate-800 text-white w-8 h-8 r
