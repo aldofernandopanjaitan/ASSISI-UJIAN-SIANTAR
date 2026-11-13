@@ -3,796 +3,274 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMK SWASTA ASSISI - Portal Akademik Terpadu</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: { primary: '#e3242b', primaryDark: '#b91c22', surface: '#f8fafc' },
-                    fontFamily: { sans: ['Inter', 'sans-serif'] }
-                }
-            }
-        }
-    </script>
+    <title>Bioskop Aldo</title>
     <style>
-        body { background-color: #f1f5f9; -webkit-font-smoothing: antialiased; }
-        .hidden-section { display: none !important; }
-        .prevent-select { user-select: none; -webkit-user-select: none; }
+        /* Gaya Dasar & Tema */
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .hidden { display: none !important; }
+        .container { background: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 100%; max-width: 800px; min-height: 500px; display: flex; flex-direction: column; }
         
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        /* Halaman Login */
+        #login-page { padding: 40px; text-align: center; max-width: 400px; margin: auto; border: 1px solid #ccc; }
+        #login-page h2 { font-size: 26px; margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        .input-group input { width: 100%; padding: 10px; font-size: 14px; border: 1px solid #ccc; box-sizing: border-box; }
+        .btn-blue { background-color: #1e90ff; color: white; border: none; padding: 12px; font-size: 16px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
         
-        /* Table Styling */
-        table { width: 100%; border-collapse: separate; border-spacing: 0; }
-        th { background-color: #f8fafc; color: #475569; font-weight: 600; font-size: 12px; text-transform: uppercase; padding: 12px; border-bottom: 2px solid #e2e8f0; }
-        td { padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #334155; background: white; vertical-align: top; }
+        /* Header Utama */
+        .header { background-color: #2c3e50; color: white; text-align: center; padding: 20px; }
+        .header h1 { margin: 0; font-size: 28px; }
+        .header p { margin: 5px 0 0 0; font-size: 14px; color: lightgray; }
         
-        /* Modal & Animations */
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Daftar Film */
+        #main-page { flex: 1; display: flex; flex-direction: column; background: #f5f5f5;}
+        .film-list { padding: 20px; overflow-y: auto; flex: 1; }
+        .film-card { background: white; border: 1px solid lightgray; display: flex; margin-bottom: 15px; padding: 15px; align-items: center; }
+        .film-img-container { width: 100px; height: 140px; background: darkgray; color: white; display: flex; justify-content: center; align-items: center; text-align: center; font-size: 12px; overflow: hidden; margin-right: 20px;}
+        .film-img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .film-info { flex: 1; }
+        .film-info h3 { margin: 0 0 10px 0; font-size: 18px; }
+        .film-info p { margin: 5px 0; font-size: 14px; }
+        .price { color: #27ae60; font-weight: bold; }
+        .order-section { display: flex; align-items: center; }
+        .order-section label { margin-right: 10px; font-size: 14px;}
+        .order-section input { width: 50px; padding: 5px; text-align: center; }
         
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 100; }
+        /* Footer / Tombol Bawah */
+        .footer { background: white; padding: 15px; display: flex; justify-content: center; gap: 10px; border-top: 1px solid #ccc; }
+        .footer button { padding: 10px 15px; border: 1px solid #ccc; background: #f9f9f9; cursor: pointer; }
+        .btn-green { background-color: #2ecc71 !important; color: white; font-weight: bold; border: none !important; }
+        
+        /* Halaman Pembayaran */
+        #payment-page { padding: 30px; }
+        #payment-page h2 { text-align: center; font-size: 22px; }
+        .receipt-box { width: 100%; height: 150px; padding: 10px; border: 1px solid #ccc; background: #f9f9f9; box-sizing: border-box; font-family: monospace; resize: none; margin-bottom: 15px;}
+        .total-price { text-align: center; color: red; font-size: 20px; font-weight: bold; margin-bottom: 20px; }
+        select { width: 100%; padding: 10px; margin-bottom: 20px; font-size: 16px; }
+        .payment-buttons { display: flex; gap: 10px; }
+        .payment-buttons button { flex: 1; padding: 12px; font-size: 16px; font-weight: bold; border: none; cursor: pointer; }
+        .btn-pay { background-color: #2980b9; color: white; }
+        
+        /* Halaman Pemutaran Film */
+        #playback-page { background: black; color: white; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
+        #playback-status { font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 30px; }
+        .progress-container { width: 80%; background: #333; height: 25px; border-radius: 5px; overflow: hidden; position: relative; }
+        .progress-bar { height: 100%; background: red; width: 0%; transition: width 0.1s linear; }
+        .progress-text { position: absolute; width: 100%; text-align: center; top: 3px; font-size: 14px; font-weight: bold; }
+        #btn-finish { position: absolute; top: 20px; background: white; color: black; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
-<body class="text-slate-800 flex h-screen overflow-hidden">
+<body>
 
-    <!-- ================= 1. HALAMAN LOGIN ================= -->
-    <div id="view-login" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-50 fade-in">
-        <div class="bg-white p-10 rounded-2xl shadow-2xl w-full max-w-md border-t-8 border-primary">
-            <div class="text-center mb-8">
-                <div class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">
-                    <i class="fas fa-school"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-slate-800">SMK SWASTA ASSISI</h2>
-                <p class="text-slate-500 text-sm mt-1">SELAMAT DATANG DI Sistem SMK SWASTA ASSISI</p>
-            </div>
-            <div class="space-y-5">
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">PERAN AKSES</label>
-                    <select id="login-role" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                        <option value="Murid">SISWA/I</option>
-                        <option value="Guru">GURU</option>
-                        <option value="Admin">ADMIN</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">USERNAME</label>
-                    <input type="text" id="login-username" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary outline-none" placeholder="Masukkan NAMA/NIS/NIP">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">PASSWORD</label>
-                    <input type="text" id="login-Password" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary outline-none" placeholder="Masukkan PASSWORD ">
-                </div>
-                <button onclick="prosesLogin()" class="w-full bg-primary hover:bg-primaryDark text-white font-bold py-3.5 px-4 rounded-lg shadow-md transition duration-200">
-                    LOGIN
-                </button>
-            </div>
+    <!-- 1. HALAMAN LOGIN -->
+    <div id="login-page" class="container">
+        <h2>LOGIN BIOSKOP ALDO</h2>
+        <div class="input-group">
+            <label>Username (aldo):</label>
+            <input type="text" id="username">
+        </div>
+        <div class="input-group">
+            <label>Password (aldo123):</label>
+            <input type="password" id="password">
+        </div>
+        <button class="btn-blue" onclick="cekLogin()">MASUK</button>
+    </div>
+
+    <!-- 2. HALAMAN UTAMA -->
+    <div id="main-page" class="container hidden">
+        <div class="header">
+            <h1>BIOSKOP ALDO</h1>
+            <p id="tgl-hari-ini"></p>
+        </div>
+        <div class="film-list" id="film-list-container">
+            <!-- Film akan di-generate via JavaScript -->
+        </div>
+        <div class="footer">
+            <button onclick="logout()">KEMBALI</button>
+            <button onclick="hapusPesanan()">HAPUS PESANAN</button>
+            <button onclick="saveData()">SAVE DATA</button>
+            <button class="btn-green" onclick="lanjutBayar()">TAMBAH PESANAN & BAYAR</button>
         </div>
     </div>
 
-    <!-- ================= 2. SIDEBAR ================= -->
-    <aside id="sidebar" class="w-64 bg-white border-r border-slate-200 flex flex-col shadow-sm hidden-section z-20 h-full">
-        <div class="p-5 border-b border-slate-100 flex items-center gap-3">
-            <div class="bg-primary text-white p-2 rounded-lg"><i class="fas fa-graduation-cap"></i></div>
-            <div>
-                <h1 class="font-bold text-slate-800 leading-tight">SMK ASSISI</h1>
-                <span id="badge-role" class="text-[10px] font-bold bg-slate-100 text-primary px-2 py-0.5 rounded-full uppercase tracking-wider">ROLE</span>
-            </div>
+    <!-- 3. HALAMAN PEMBAYARAN -->
+    <div id="payment-page" class="container hidden">
+        <h2>DETAIL PEMBAYARAN</h2>
+        <textarea class="receipt-box" id="receipt-text" readonly></textarea>
+        <div class="total-price" id="total-display">Total Bayar: Rp 0</div>
+        
+        <label><b>Pilih Metode Pembayaran:</b></label>
+        <select id="payment-method">
+            <option>DANA QR</option>
+            <option>GOPAY QR</option>
+            <option>OVO QR</option>
+            <option>Mobile Banking BCA</option>
+            <option>Mobile Banking MANDIRI</option>
+            <option>Mobile Banking BNI</option>
+            <option>Mobile Banking BRI</option>
+        </select>
+        
+        <div class="payment-buttons">
+            <button onclick="kembaliKeMenu()">Kembali</button>
+            <button class="btn-pay" onclick="prosesBayar()">BAYAR SEKARANG</button>
         </div>
-        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-2" id="nav-menu">
-            <!-- Nav buttons generated via JS based on role -->
-        </nav>
-        <div class="p-4 border-t border-slate-100">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold"><i class="fas fa-user"></i></div>
-                <div class="overflow-hidden">
-                    <p id="display-name" class="text-sm font-bold text-slate-800 truncate">User</p>
-                </div>
-            </div>
-            <button onclick="prosesLogout()" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold rounded-lg text-white bg-slate-800 hover:bg-slate-900 transition-colors">
-                <i class="fas fa-power-off"></i> KELUAR
-            </button>
-        </div>
-    </aside>
+    </div>
 
-    <!-- ================= 3. MAIN CONTENT ================= -->
-    <main id="main-content" class="flex-1 flex flex-col h-screen overflow-hidden hidden-section bg-slate-50">
-        <!-- TOPBAR PERINGATAN UJIAN -->
-        <div id="topbar-warning" class="hidden-section bg-primary text-white px-6 py-3 flex justify-between items-center shadow-md z-10">
-            <div class="font-bold flex items-center gap-2"><i class="fas fa-shield-alt animate-pulse"></i> MODE UJIAN AKTIF (ANTI-CHEAT)</div>
-            <div class="text-xl font-mono font-bold bg-black/20 px-4 py-1 rounded-lg" id="timer-display">00:00:00</div>
+    <!-- 4. HALAMAN PEMUTARAN FILM -->
+    <div id="playback-page" class="container hidden">
+        <button id="btn-finish" class="hidden" onclick="kembaliKeMenu()">KEMBALI KE LAYAR UTAMA</button>
+        <div id="playback-status">MEMPERSIAPKAN FILM...</div>
+        <div class="progress-container" id="progress-area">
+            <div class="progress-bar" id="progress-bar"></div>
+            <div class="progress-text" id="progress-text">0%</div>
         </div>
+    </div>
 
-        <div class="flex-1 overflow-y-auto p-6" id="content-area">
-            <!-- Tempat Konten Menu Dirender -->
-        </div>
-    </main>
-
-    <!-- ================= JAVASCRIPT ================= -->
     <script>
-        /* --- STATE & DATABASE LOKAL (LocalStorage) --- */
-        let currentUser = { role: '', name: '' };
-        let isExamActive = false;
-        let examTimer = null;
-        let db = {
-            jadwalUjian: JSON.parse(localStorage.getItem('db_jadwalUjian')) || [],
-            jadwalHarian: JSON.parse(localStorage.getItem('db_jadwalHarian')) || [],
-            presensi: JSON.parse(localStorage.getItem('db_presensi')) || [],
-            materi: JSON.parse(localStorage.getItem('db_materi')) || [],
-            soal: JSON.parse(localStorage.getItem('db_soal')) || [],
-            hasilUjian: JSON.parse(localStorage.getItem('db_hasilUjian')) || []
-        };
+        // Mendapatkan Tanggal Hari Ini
+        const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        let today = new Date();
+        let formattedDate = today.getDate() + " " + months[today.getMonth()] + " " + today.getFullYear();
+        document.getElementById('tgl-hari-ini').innerText = "Tanggal Hari Ini: " + formattedDate;
 
-        const listKelas = ["10 RPL", "10 TB", "10 AK", "11 RPL", "11 TB", "11 AK", "12 RPL", "12 TB", "12 AK"];
-        const listMapel = ["Agama", "PKN", "Bahasa Indonesia", "Matematika", "Bahasa Inggris", "Kejuruan RPL", "Kejuruan TB", "Kejuruan AK", "IPA", "IPS"];
-        const listGuru = ["Sr.Gaudensia Silalahi", "H.Tindaon", "P.Tambunan", "E.Sirait", "E.Silalahi", "A.Lumbantobing", "M.Haloho", "E.Nainggolan", "L.Panggabean", "E.Gultom", "K.Silitonga", "O.Nadeak"];
+        // Data Film
+        const dataFilm = [
+            { nama: "Avatar: The Way of Water", genre: "Sci-Fi / Action", rilis: "08 November 2026", harga: 55000, gambar: "assets/film1.png" },
+            { nama: "John Wick 4", genre: "Action / Crime", rilis: "03 November 2026", harga: 50000, gambar: "assets/film2.png" },
+            { nama: "Transformers: Rise", genre: "Action / Mecha", rilis: "29 Oktober 2026", harga: 45000, gambar: "assets/film3.png" }
+        ];
+
+        let selectedMovies = [];
+        let totalHarga = 0;
+
+        // Render Daftar Film ke HTML
+        const filmContainer = document.getElementById('film-list-container');
+        dataFilm.forEach((film, index) => {
+            filmContainer.innerHTML += `
+                <div class="film-card">
+                    <div class="film-img-container">
+                        <img src="${film.gambar}" alt="GAMBAR FILM" onerror="this.style.display='none'; this.parentNode.innerHTML='GAMBAR FILM';">
+                    </div>
+                    <div class="film-info">
+                        <h3>${film.nama}</h3>
+                        <p>Genre: ${film.genre}</p>
+                        <p>Rilis: ${film.rilis}</p>
+                        <p class="price">Harga: Rp ${film.harga}</p>
+                    </div>
+                    <div class="order-section">
+                        <label>Pesan Tiket:</label>
+                        <input type="number" id="qty-${index}" value="0" min="0" max="10">
+                    </div>
+                </div>
+            `;
+        });
+
+        // Navigasi Halaman
+        function showPage(pageId) {
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('main-page').classList.add('hidden');
+            document.getElementById('payment-page').classList.add('hidden');
+            document.getElementById('playback-page').classList.add('hidden');
+            document.getElementById(pageId).classList.remove('hidden');
+        }
+
+        // Fungsi Login
+        function cekLogin() {
+            let user = document.getElementById('username').value;
+            let pass = document.getElementById('password').value;
+            if (user === "aldo" && pass === "aldo123") {
+                showPage('main-page');
+            } else {
+                alert("Username atau Password Salah!");
+            }
+        }
+
+        function logout() {
+            document.getElementById('username').value = "";
+            document.getElementById('password').value = "";
+            showPage('login-page');
+        }
+
+        // Fungsi Menu Utama
+        function hapusPesanan() {
+            dataFilm.forEach((_, i) => document.getElementById(`qty-${i}`).value = 0);
+            alert("Semua pesanan dihapus!");
+        }
 
         function saveData() {
-            localStorage.setItem('db_jadwalUjian', JSON.stringify(db.jadwalUjian));
-            localStorage.setItem('db_jadwalHarian', JSON.stringify(db.jadwalHarian));
-            localStorage.setItem('db_presensi', JSON.stringify(db.presensi));
-            localStorage.setItem('db_materi', JSON.stringify(db.materi));
-            localStorage.setItem('db_soal', JSON.stringify(db.soal));
-            localStorage.setItem('db_hasilUjian', JSON.stringify(db.hasilUjian));
+            alert("Data Film & Tanggal berhasil di-save dan diperbarui!");
         }
 
-        /* --- LOGIN & LOGOUT --- */
-        function prosesLogin() {
-            let role = document.getElementById('login-role').value;
-            let name = document.getElementById('login-username').value.trim();
-            if (!name) { alert('Nama pengguna wajib diisi!'); return; }
+        function lanjutBayar() {
+            selectedMovies = [];
+            totalHarga = 0;
+            let receipt = `Tanggal Transaksi: ${formattedDate}\n\n`;
+            let hasItem = false;
 
-            currentUser = { role, name };
-            document.getElementById('view-login').classList.add('hidden-section');
-            document.getElementById('sidebar').classList.remove('hidden-section');
-            document.getElementById('main-content').classList.remove('hidden-section');
-            
-            document.getElementById('badge-role').innerText = role;
-            document.getElementById('display-name').innerText = name;
-            
-            renderMenu();
-            renderDashboard();
-        }
-
-        function prosesLogout() {
-            if (isExamActive) {
-                picuAntiCheat("Sistem menolak logout. Anda masih dalam sesi ujian aktif!");
-                return;
-            }
-            location.reload();
-        }
-
-        /* --- NAVIGASI --- */
-        function renderMenu() {
-            const menu = document.getElementById('nav-menu');
-            let html = `<button onclick="renderDashboard()" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-red-50 hover:text-primary transition-colors"><i class="fas fa-home w-5"></i> Beranda</button>`;
-            
-            if (currentUser.role === 'Admin' || currentUser.role === 'Guru') {
-                html += `
-                    <button onclick="renderJadwalUjian()" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-red-50 hover:text-primary"><i class="fas fa-calendar-check w-5"></i> Jadwal Ujian</button>
-                    <button onclick="renderJadwalHarian()" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-red-50 hover:text-primary"><i class="fas fa-calendar-alt w-5"></i> Jadwal Harian</button>
-                    <button onclick="renderPresensi()" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-red-50 hover:text-primary"><i class="fas fa-qrcode w-5"></i> Data Presensi</button>
-                    <button onclick="renderMateri()" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-red-50 hover:text-primary"><i class="fas fa-book w-5"></i> Manajemen Materi</button>
-                    <button onclick="renderManajemenSoal()" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-red-50 hover:text-primary"><i class="fas fa-file-alt w-5"></i> Manajemen Soal CBT</button>
-                    <button onclick="renderLaporan()" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-red-50 hover:text-primary"><i class="fas fa-chart-bar w-5"></i> Laporan Nilai</button>
-                `;
-            } else if (currentUser.role === 'Siswa') {
-                html += `
-                    <button onclick="renderJadwalSiswa()" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-red-50 hover:text-primary"><i class="fas fa-calendar w-5"></i> Jadwal Saya</button>
-                    <button onclick="renderPresensiForm()" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-red-50 hover:text-primary"><i class="fas fa-qrcode w-5"></i> Isi Presensi QR</button>
-                    <button onclick="renderMateriSiswa()" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-red-50 hover:text-primary"><i class="fas fa-book w-5"></i> Materi Pembelajaran</button>
-                    <button onclick="renderUjianSiswa()" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-red-50 hover:text-primary"><i class="fas fa-laptop-code w-5"></i> Portal Ujian</button>
-                `;
-            }
-            menu.innerHTML = html;
-        }
-
-        function setContent(html) {
-            if (isExamActive) {
-                picuAntiCheat("Dilarang berpindah menu selama ujian berlangsung!");
-                return;
-            }
-            document.getElementById('content-area').innerHTML = `<div class="fade-in">${html}</div>`;
-        }
-
-        /* --- GENERATOR OPSI --- */
-        function genOptions(arr) { return arr.map(a => `<option value="${a}">${a}</option>`).join(''); }
-        function genNumOptions(start, end) { 
-            let res = ''; for(let i=start; i<=end; i++) res += `<option value="${i}">${i}</option>`; return res; 
-        }
-
-        /* ================= FITUR 1: BERANDA ================= */
-        function renderDashboard() {
-            setContent(`
-                <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
-                    <h2 class="text-3xl font-bold text-slate-800 mb-2">Selamat Datang, ${currentUser.name}!</h2>
-                    <p class="text-slate-500">Anda login sebagai <span class="font-bold text-primary">${currentUser.role}</span> di Sistem Akademik SMK Swasta Assisi.</p>
-                </div>
-            `);
-        }
-
-        /* ================= FITUR 2: JADWAL UJIAN (ADMIN/GURU) ================= */
-        function renderJadwalUjian() {
-            let html = `
-                <div class="flex justify-between items-end mb-6">
-                    <h2 class="text-2xl font-bold text-slate-800">JADWAL UJIAN</h2>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-6">
-                    <form onsubmit="saveJadwalUjian(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <input type="hidden" id="ju-id" value="">
-                        <div><label class="text-sm font-bold">Tanggal</label><input type="date" id="ju-tgl" class="w-full p-2 border rounded" required></div>
-                        <div><label class="text-sm font-bold">Jam/Waktu</label><input type="time" step="1" id="ju-jam" class="w-full p-2 border rounded" required></div>
-                        <div><label class="text-sm font-bold">Mata Ujian</label><select id="ju-mapel" class="w-full p-2 border rounded" required>${genOptions(listMapel)}</select></div>
-                        <div><label class="text-sm font-bold">Kelas</label><select id="ju-kelas" class="w-full p-2 border rounded" required>${genOptions(listKelas)}</select></div>
-                        <div><label class="text-sm font-bold">Ruang (1-100)</label><select id="ju-ruang" class="w-full p-2 border rounded" required>${genNumOptions(1,100)}</select></div>
-                        <div><label class="text-sm font-bold">Sesi (1-100)</label><select id="ju-sesi" class="w-full p-2 border rounded" required>${genNumOptions(1,100)}</select></div>
-                        <div><label class="text-sm font-bold">Jml Siswa (1-100)</label><select id="ju-siswa" class="w-full p-2 border rounded" required>${genNumOptions(1,100)}</select></div>
-                        <div><label class="text-sm font-bold">Pengawas</label><select id="ju-pengawas" class="w-full p-2 border rounded" required>${genOptions(listGuru)}</select></div>
-                        <div class="flex items-end"><button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold p-2 rounded"><i class="fas fa-save"></i> SIMPAN DATA</button></div>
-                    </form>
-                </div>
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <table>
-                        <thead><tr><th>Tgl/Jam</th><th>Mapel</th><th>Kelas</th><th>Ruang/Sesi</th><th>Jml Siswa</th><th>Pengawas</th><th>Aksi</th></tr></thead>
-                        <tbody>${db.jadwalUjian.map(j => `
-                            <tr>
-                                <td>${j.tgl}<br><span class="text-xs font-bold text-primary">${j.jam}</span></td>
-                                <td>${j.mapel}</td><td>${j.kelas}</td><td>R.${j.ruang} / S.${j.sesi}</td><td>${j.jmlSiswa}</td><td>${j.pengawas}</td>
-                                <td>
-                                    <button onclick="editJadwalUjian(${j.id})" class="bg-amber-500 text-white px-2 py-1 rounded text-xs">EDIT</button>
-                                    <button onclick="hapusData('jadwalUjian', ${j.id}, renderJadwalUjian)" class="bg-red-500 text-white px-2 py-1 rounded text-xs">HAPUS</button>
-                                </td>
-                            </tr>
-                        `).join('') || `<tr><td colspan="7" class="text-center text-slate-400 py-4">Data Kosong</td></tr>`}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            setContent(html);
-        }
-
-        function saveJadwalUjian(e) {
-            e.preventDefault();
-            let id = document.getElementById('ju-id').value;
-            let data = {
-                id: id ? parseInt(id) : Date.now(),
-                tgl: document.getElementById('ju-tgl').value,
-                jam: document.getElementById('ju-jam').value,
-                mapel: document.getElementById('ju-mapel').value,
-                kelas: document.getElementById('ju-kelas').value,
-                ruang: document.getElementById('ju-ruang').value,
-                sesi: document.getElementById('ju-sesi').value,
-                jmlSiswa: document.getElementById('ju-siswa').value,
-                pengawas: document.getElementById('ju-pengawas').value,
-                lokasi: "SMK SWASTA ASSISI"
-            };
-            if (id) db.jadwalUjian = db.jadwalUjian.map(x => x.id == id ? data : x);
-            else db.jadwalUjian.push(data);
-            saveData(); renderJadwalUjian();
-        }
-
-        function editJadwalUjian(id) {
-            let data = db.jadwalUjian.find(x => x.id === id);
-            if(!data) return;
-            document.getElementById('ju-id').value = data.id;
-            document.getElementById('ju-tgl').value = data.tgl;
-            document.getElementById('ju-jam').value = data.jam;
-            document.getElementById('ju-mapel').value = data.mapel;
-            document.getElementById('ju-kelas').value = data.kelas;
-            document.getElementById('ju-ruang').value = data.ruang;
-            document.getElementById('ju-sesi').value = data.sesi;
-            document.getElementById('ju-siswa').value = data.jmlSiswa;
-            document.getElementById('ju-pengawas').value = data.pengawas;
-        }
-
-        /* ================= FITUR 3: JADWAL HARIAN LES (ADMIN/GURU) ================= */
-        function renderJadwalHarian() {
-            let html = `
-                <h2 class="text-2xl font-bold text-slate-800 mb-6">Manajemen Jadwal Les Harian (1-10)</h2>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-6">
-                    <form onsubmit="saveJadwalHarian(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <input type="hidden" id="jh-id" value="">
-                        <div><label class="text-sm font-bold">Tanggal</label><input type="date" id="jh-tgl" class="w-full p-2 border rounded" required></div>
-                        <div><label class="text-sm font-bold">Jam Les (Misal 08:00:00)</label><input type="time" step="1" id="jh-jam" class="w-full p-2 border rounded" required></div>
-                        <div><label class="text-sm font-bold">Mata Pelajaran</label><select id="jh-mapel" class="w-full p-2 border rounded" required>${genOptions(listMapel)}</select></div>
-                        <div><label class="text-sm font-bold">Kelas</label><select id="jh-kelas" class="w-full p-2 border rounded" required>${genOptions(listKelas)}</select></div>
-                        <div><label class="text-sm font-bold">Jml Siswa</label><select id="jh-siswa" class="w-full p-2 border rounded" required>${genNumOptions(1,100)}</select></div>
-                        <div><label class="text-sm font-bold">Pengajar</label><select id="jh-pengajar" class="w-full p-2 border rounded" required>${genOptions(listGuru)}</select></div>
-                        <div class="col-span-3 flex justify-end"><button type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-6 rounded"><i class="fas fa-save"></i> SIMPAN JADWAL</button></div>
-                    </form>
-                </div>
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <table>
-                        <thead><tr><th>Tgl/Jam</th><th>Mapel</th><th>Kelas</th><th>Jml Siswa</th><th>Pengajar</th><th>Aksi</th></tr></thead>
-                        <tbody>${db.jadwalHarian.map(j => `
-                            <tr>
-                                <td>${j.tgl}<br><span class="text-xs font-bold text-primary">${j.jam}</span></td>
-                                <td>${j.mapel}</td><td>${j.kelas}</td><td>${j.jmlSiswa}</td><td>${j.pengajar}</td>
-                                <td>
-                                    <button onclick="hapusData('jadwalHarian', ${j.id}, renderJadwalHarian)" class="bg-red-500 text-white px-2 py-1 rounded text-xs">HAPUS</button>
-                                </td>
-                            </tr>
-                        `).join('') || `<tr><td colspan="6" class="text-center text-slate-400 py-4">Data Kosong</td></tr>`}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            setContent(html);
-        }
-
-        function saveJadwalHarian(e) {
-            e.preventDefault();
-            db.jadwalHarian.push({
-                id: Date.now(),
-                tgl: document.getElementById('jh-tgl').value,
-                jam: document.getElementById('jh-jam').value,
-                mapel: document.getElementById('jh-mapel').value,
-                kelas: document.getElementById('jh-kelas').value,
-                jmlSiswa: document.getElementById('jh-siswa').value,
-                pengajar: document.getElementById('jh-pengajar').value,
-                lokasi: "SMK SWASTA ASSISI"
-            });
-            saveData(); renderJadwalHarian();
-        }
-
-        /* ================= FITUR 4: PRESENSI & QR ================= */
-        function renderPresensi() {
-            let html = `
-                <h2 class="text-2xl font-bold text-slate-800 mb-6">Data Rekap Presensi (Ujian & Harian)</h2>
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <table>
-                        <thead><tr><th>Tanggal/Waktu</th><th>Nama Lengkap</th><th>Peran / Tipe</th><th>Bukti Foto</th><th>Aksi</th></tr></thead>
-                        <tbody>${db.presensi.map(p => `
-                            <tr>
-                                <td>${p.tgl} ${p.jam}</td>
-                                <td>${p.nama}</td>
-                                <td><span class="px-2 py-1 rounded text-xs font-bold ${p.tipe === 'Ujian' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}">${p.tipe} - ${p.peran}</span></td>
-                                <td><img src="${p.foto}" alt="Bukti" class="w-16 h-16 object-cover border rounded cursor-pointer" onclick="viewImage('${p.foto}')"></td>
-                                <td><button onclick="hapusData('presensi', ${p.id}, renderPresensi)" class="bg-red-500 text-white px-2 py-1 rounded text-xs">HAPUS</button></td>
-                            </tr>
-                        `).join('') || `<tr><td colspan="5" class="text-center text-slate-400 py-4">Belum ada presensi</td></tr>`}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            setContent(html);
-        }
-
-        function renderPresensiForm() {
-            let html = `
-                <h2 class="text-2xl font-bold text-slate-800 mb-6">Isi Presensi QR / Foto Bukti Kehadiran</h2>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 max-w-lg">
-                    <form onsubmit="savePresensi(event)" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-bold mb-1">Tipe Presensi</label>
-                            <select id="pres-tipe" class="w-full p-2 border rounded" required>
-                                <option value="Harian">Kehadiran Harian Sekolah</option>
-                                <option value="Ujian">Kehadiran Ujian</option>
-                            </select>
-                        </div>
-                        <div class="border-2 border-dashed border-slate-300 p-8 text-center rounded-lg bg-slate-50 relative cursor-pointer hover:bg-slate-100">
-                            <i class="fas fa-qrcode text-4xl text-slate-400 mb-2"></i><br>
-                            <span class="text-sm font-bold text-slate-600">Scan QR Code Mockup</span><br>
-                            <span class="text-xs text-slate-500">Atau Unggah Foto Bukti Kehadiran (Wajib)</span>
-                            <input type="file" id="pres-foto" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required onchange="previewUpload(this, 'pres-preview')">
-                        </div>
-                        <div id="pres-preview" class="text-center hidden-section">
-                            <p class="text-xs text-green-600 font-bold mb-1">Foto berhasil dimuat (Telah dikompresi untuk memori lokal)</p>
-                            <img id="pres-img-element" src="" class="mx-auto max-h-32 rounded border">
-                        </div>
-                        <div class="bg-blue-50 p-3 rounded text-xs text-blue-800">
-                            <strong>Panduan GitHub:</strong> Gambar akan di-resize dan dikonversi ke format Base64 untuk disimpan secara independen di LocalStorage.
-                        </div>
-                        <button type="submit" class="w-full bg-primary text-white font-bold p-3 rounded">KIRIM PRESENSI & SIMPAN</button>
-                    </form>
-                </div>
-            `;
-            setContent(html);
-        }
-
-        // Image Compression & Save
-        function previewUpload(input, previewBoxId) {
-            let file = input.files[0];
-            if (!file) return;
-            let reader = new FileReader();
-            reader.onload = function(e) {
-                // Kompresi Gambar agar tidak kena limit Quota LocalStorage
-                let img = new Image();
-                img.onload = function() {
-                    let canvas = document.createElement('canvas');
-                    let ctx = canvas.getContext('2d');
-                    let maxW = 300, maxH = 300;
-                    let width = img.width, height = img.height;
-                    if (width > height) { if (width > maxW) { height *= maxW / width; width = maxW; } }
-                    else { if (height > maxH) { width *= maxH / height; height = maxH; } }
-                    canvas.width = width; canvas.height = height;
-                    ctx.drawImage(img, 0, 0, width, height);
-                    
-                    let dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                    document.getElementById('pres-img-element').src = dataUrl;
-                    document.getElementById('pres-img-element').dataset.base64 = dataUrl;
-                    document.getElementById(previewBoxId).classList.remove('hidden-section');
+            dataFilm.forEach((film, i) => {
+                let qty = parseInt(document.getElementById(`qty-${i}`).value);
+                if (qty > 0) {
+                    hasItem = true;
+                    let subtotal = qty * film.harga;
+                    totalHarga += subtotal;
+                    receipt += `- ${film.nama} (x${qty}) = Rp${subtotal}\n`;
+                    for(let j=0; j<qty; j++) selectedMovies.push(film.nama);
                 }
-                img.src = e.target.result;
+            });
+
+            if (!hasItem) {
+                alert("Pilih minimal 1 film terlebih dahulu!");
+                return;
             }
-            reader.readAsDataURL(file);
+
+            document.getElementById('receipt-text').value = receipt;
+            document.getElementById('total-display').innerText = "Total Bayar: Rp " + totalHarga;
+            showPage('payment-page');
         }
 
-        function savePresensi(e) {
-            e.preventDefault();
-            let base64Img = document.getElementById('pres-img-element').dataset.base64;
-            if(!base64Img) { alert("Harap unggah foto!"); return; }
-
-            let d = new Date();
-            db.presensi.push({
-                id: Date.now(),
-                tgl: d.toISOString().split('T')[0],
-                jam: d.toTimeString().split(' ')[0],
-                nama: currentUser.name,
-                peran: currentUser.role,
-                tipe: document.getElementById('pres-tipe').value,
-                foto: base64Img
-            });
-            saveData();
-            alert("Presensi berhasil disimpan!");
-            renderPresensiForm();
+        function kembaliKeMenu() {
+            document.getElementById('btn-finish').classList.add('hidden');
+            document.getElementById('progress-area').classList.remove('hidden');
+            showPage('main-page');
         }
 
-        /* ================= FITUR 5: MANAJEMEN MATERI ================= */
-        function renderMateri() {
-            let html = `
-                <h2 class="text-2xl font-bold text-slate-800 mb-6">Manajemen Materi Pelajaran</h2>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-6">
-                    <form onsubmit="saveMateri(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div><label class="text-sm font-bold">Tanggal</label><input type="date" id="mat-tgl" class="w-full p-2 border rounded" required></div>
-                        <div><label class="text-sm font-bold">Judul Materi</label><input type="text" id="mat-judul" class="w-full p-2 border rounded" required></div>
-                        <div><label class="text-sm font-bold">Mata Pelajaran (Terpisah)</label><select id="mat-mapel" class="w-full p-2 border rounded" required>${genOptions(listMapel)}</select></div>
-                        <div><label class="text-sm font-bold">Kategori Kelas</label><select id="mat-kelas" class="w-full p-2 border rounded" required>${genOptions(listKelas)}</select></div>
-                        <div><label class="text-sm font-bold">Nama Guru</label><select id="mat-guru" class="w-full p-2 border rounded" required>${genOptions(listGuru)}</select></div>
-                        <div>
-                            <label class="text-sm font-bold">Unggah File (Word/Excel/PPT/Gambar/Video)</label>
-                            <input type="file" id="mat-file" class="w-full p-2 border rounded text-sm" required>
-                        </div>
-                        <div class="col-span-1 md:col-span-2 flex justify-end">
-                            <button type="submit" class="bg-emerald-500 text-white font-bold py-2 px-6 rounded">SIMPAN MATERI</button>
-                        </div>
-                    </form>
-                </div>
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <table>
-                        <thead><tr><th>Tgl</th><th>Judul</th><th>Mapel / Kelas</th><th>File Data</th><th>Guru</th><th>Aksi</th></tr></thead>
-                        <tbody>${db.materi.map(m => `
-                            <tr>
-                                <td>${m.tgl}</td><td class="font-bold text-primary">${m.judul}</td><td>${m.mapel}<br><span class="text-xs">${m.kelas}</span></td>
-                                <td><span class="bg-slate-100 px-2 py-1 rounded text-xs border"><i class="fas fa-file"></i> ${m.fileName}</span></td>
-                                <td>${m.guru}</td>
-                                <td><button onclick="hapusData('materi', ${m.id}, renderMateri)" class="bg-red-500 text-white px-2 py-1 rounded text-xs">HAPUS</button></td>
-                            </tr>
-                        `).join('') || `<tr><td colspan="6" class="text-center py-4">Belum ada materi</td></tr>`}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            setContent(html);
+        // Fungsi Pembayaran
+        function prosesBayar() {
+            let method = document.getElementById('payment-method').value;
+            alert(`Pembayaran berhasil menggunakan ${method} pada ${formattedDate}`);
+            showPage('playback-page');
+            putarFilm();
         }
 
-        function saveMateri(e) {
-            e.preventDefault();
-            let fileInput = document.getElementById('mat-file');
-            // Mockup saving file (To prevent LocalStorage crash from large Word/Video files, we save metadata)
-            db.materi.push({
-                id: Date.now(),
-                tgl: document.getElementById('mat-tgl').value,
-                judul: document.getElementById('mat-judul').value,
-                mapel: document.getElementById('mat-mapel').value,
-                kelas: document.getElementById('mat-kelas').value,
-                guru: document.getElementById('mat-guru').value,
-                fileName: fileInput.files[0] ? fileInput.files[0].name : "Document.pdf"
-            });
-            saveData(); renderMateri();
-        }
-
-        function renderMateriSiswa() {
-            let html = `
-                <h2 class="text-2xl font-bold text-slate-800 mb-6">Materi Pembelajaran Saya</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    ${db.materi.map(m => `
-                        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition">
-                            <div class="text-xs text-slate-400 mb-2">${m.tgl}</div>
-                            <h3 class="font-bold text-lg text-primary mb-1">${m.judul}</h3>
-                            <p class="text-sm font-semibold text-slate-600">${m.mapel} - ${m.kelas}</p>
-                            <p class="text-xs text-slate-500 mt-2"><i class="fas fa-chalkboard-teacher"></i> ${m.guru}</p>
-                            <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
-                                <span class="text-xs truncate max-w-[150px] text-blue-500"><i class="fas fa-file"></i> ${m.fileName}</span>
-                                <button class="bg-slate-800 text-white px-3 py-1 rounded text-xs" onclick="alert('File berhasil diunduh!')">UNDUH</button>
-                            </div>
-                        </div>
-                    `).join('') || `<p class="text-slate-500 col-span-3">Belum ada materi yang dibagikan guru.</p>`}
-                </div>
-            `;
-            setContent(html);
-        }
-
-        /* ================= FITUR 6: SISTEM CBT & ANTI CHEAT ================= */
-        // Admin/Guru: Buat Soal
-        function renderManajemenSoal() {
-            let html = `
-                <h2 class="text-2xl font-bold text-slate-800 mb-6">Manajemen Soal Ujian (CBT)</h2>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-6">
-                    <form onsubmit="saveSoal(event)" class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label class="text-sm font-bold">Mata Ujian</label><select id="soal-mapel" class="w-full p-2 border rounded" required>${genOptions(listMapel)}</select></div>
-                            <div><label class="text-sm font-bold">Tipe Soal</label>
-                                <select id="soal-tipe" class="w-full p-2 border rounded" required onchange="toggleTipeSoal(this.value)">
-                                    <option value="PG">Pilihan Berganda (A-E)</option>
-                                    <option value="Essay">Essay / Isian (100-900 kata)</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div><label class="text-sm font-bold">Pertanyaan (1-100 Soal)</label><textarea id="soal-tanya" class="w-full p-2 border rounded h-20" required></textarea></div>
-                        
-                        <div id="soal-opsi-group" class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            <div><label class="text-xs font-bold">Opsi A</label><input type="text" id="soal-a" class="w-full p-2 border rounded text-sm"></div>
-                            <div><label class="text-xs font-bold">Opsi B</label><input type="text" id="soal-b" class="w-full p-2 border rounded text-sm"></div>
-                            <div><label class="text-xs font-bold">Opsi C</label><input type="text" id="soal-c" class="w-full p-2 border rounded text-sm"></div>
-                            <div><label class="text-xs font-bold">Opsi D</label><input type="text" id="soal-d" class="w-full p-2 border rounded text-sm"></div>
-                            <div><label class="text-xs font-bold">Opsi E</label><input type="text" id="soal-e" class="w-full p-2 border rounded text-sm"></div>
-                            <div><label class="text-xs font-bold text-emerald-600">Kunci Jawaban PG (A/B/C/D/E)</label><select id="soal-kunci-pg" class="w-full p-2 border rounded text-sm bg-emerald-50"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option></select></div>
-                        </div>
-
-                        <div id="soal-kunci-essay-group" class="hidden-section">
-                            <label class="text-sm font-bold text-emerald-600">Kunci Jawaban Benar (Untuk Isian)</label>
-                            <textarea id="soal-kunci-essay" class="w-full p-2 border rounded h-20 bg-emerald-50"></textarea>
-                        </div>
-                        
-                        <button type="submit" class="bg-primary text-white font-bold p-3 rounded">TAMBAHKAN SOAL</button>
-                    </form>
-                </div>
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden p-4">
-                    <h3 class="font-bold mb-4">Daftar Soal Tersimpan (${db.soal.length})</h3>
-                    ${db.soal.map((s, idx) => `
-                        <div class="border-b pb-3 mb-3">
-                            <p class="font-bold text-sm">${idx+1}. [${s.mapel}] - ${s.tipe}</p>
-                            <p class="text-sm mb-1">${s.tanya}</p>
-                            <p class="text-xs text-emerald-600 font-bold">Kunci: ${s.kunci}</p>
-                            <button onclick="hapusData('soal', ${s.id}, renderManajemenSoal)" class="text-red-500 text-xs font-bold mt-1">HAPUS SOAL INI</button>
-                        </div>
-                    `).join('') || '<p class="text-xs text-slate-500">Soal kosong.</p>'}
-                </div>
-            `;
-            setContent(html);
-        }
-
-        function toggleTipeSoal(val) {
-            document.getElementById('soal-opsi-group').classList.toggle('hidden-section', val === 'Essay');
-            document.getElementById('soal-kunci-essay-group').classList.toggle('hidden-section', val === 'PG');
-        }
-
-        function saveSoal(e) {
-            e.preventDefault();
-            let tipe = document.getElementById('soal-tipe').value;
-            db.soal.push({
-                id: Date.now(),
-                mapel: document.getElementById('soal-mapel').value,
-                tipe: tipe,
-                tanya: document.getElementById('soal-tanya').value,
-                opsi: tipe === 'PG' ? {
-                    A: document.getElementById('soal-a').value, B: document.getElementById('soal-b').value,
-                    C: document.getElementById('soal-c').value, D: document.getElementById('soal-d').value,
-                    E: document.getElementById('soal-e').value
-                } : null,
-                kunci: tipe === 'PG' ? document.getElementById('soal-kunci-pg').value : document.getElementById('soal-kunci-essay').value
-            });
-            saveData(); renderManajemenSoal();
-        }
-
-        // Siswa: UI Ujian
-        function renderUjianSiswa() {
-            let html = `
-                <div class="max-w-2xl mx-auto text-center mt-10">
-                    <i class="fas fa-shield-alt text-6xl text-primary mb-4"></i>
-                    <h2 class="text-3xl font-bold text-slate-800 mb-2">Portal Ujian CBT</h2>
-                    <p class="text-slate-600 mb-6">Pilih durasi waktu yang ditetapkan guru. Perhatian: Sistem Anti-Cheat aktif ketat selama ujian.</p>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 text-left">
-                        <label class="block text-sm font-bold mb-2">Pilih Durasi Ujian</label>
-                        <select id="ujian-durasi" class="w-full p-3 border rounded-lg mb-4">
-                            <option value="20">20 Menit</option>
-                            <option value="60">60 Menit (1 Jam)</option>
-                            <option value="90">90 Menit</option>
-                            <option value="120">120 Menit (2 Jam)</option>
-                        </select>
-                        <button onclick="mulaiUjian()" class="w-full bg-primary hover:bg-primaryDark text-white font-bold text-lg py-4 rounded-xl shadow-lg">MULAI UJIAN SEKARANG</button>
-                    </div>
-                </div>
-            `;
-            setContent(html);
-        }
-
-        function mulaiUjian() {
-            if(db.soal.length === 0) { alert("Belum ada soal tersedia!"); return; }
+        // Fungsi Pemutaran Film (Otomatis seperti Timer di Java)
+        function putarFilm() {
+            let indexFilm = 0;
+            let progress = 0;
+            let statusText = document.getElementById('playback-status');
+            let progressBar = document.getElementById('progress-bar');
+            let progressText = document.getElementById('progress-text');
             
-            isExamActive = true;
-            document.getElementById('sidebar').classList.add('hidden-section');
-            document.getElementById('topbar-warning').classList.remove('hidden-section');
+            statusText.innerText = "SEDANG MEMUTAR: " + selectedMovies[indexFilm];
             
-            let durasiMenit = parseInt(document.getElementById('ujian-durasi').value);
-            let sisaDetik = durasiMenit * 60;
-            
-            // Build Soal UI
-            let formHtml = db.soal.map((s, idx) => {
-                let konten = '';
-                if(s.tipe === 'PG') {
-                    for(const [key, val] of Object.entries(s.opsi)) {
-                        konten += `<label class="block p-3 border rounded mb-2 cursor-pointer hover:bg-slate-50"><input type="radio" name="ans_${s.id}" value="${key}" class="mr-2"> ${key}. ${val}</label>`;
+            let interval = setInterval(() => {
+                progress += 2; // Kecepatan progres
+                progressBar.style.width = progress + "%";
+                progressText.innerText = progress + "%";
+
+                if (progress >= 100) {
+                    progress = 0;
+                    indexFilm++;
+                    if (indexFilm < selectedMovies.length) {
+                        statusText.innerText = "SEDANG MEMUTAR: " + selectedMovies[indexFilm];
+                    } else {
+                        clearInterval(interval);
+                        statusText.innerHTML = "Terimakasih udah menonton<br>Bioskop aldo";
+                        document.getElementById('progress-area').classList.add('hidden');
+                        document.getElementById('btn-finish').classList.remove('hidden');
                     }
-                } else {
-                    konten = `<textarea name="ans_${s.id}" class="w-full h-32 p-3 border rounded outline-none focus:ring-2 focus:ring-primary" placeholder="Tulis uraian (100-900 kata)..."></textarea>`;
                 }
-                return `
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-4" id="box_${s.id}">
-                        <p class="font-bold text-lg mb-4">${idx+1}. ${s.tanya}</p>
-                        ${konten}
-                    </div>
-                `;
-            }).join('');
-
-            let uiHtml = `
-                <div class="max-w-4xl mx-auto prevent-select">
-                    <form id="form-lembar-ujian">
-                        ${formHtml}
-                        <button type="button" onclick="kumpulUjian()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xl py-5 rounded-xl shadow-lg mt-4">SIMPAN JAWABANNYA</button>
-                    </form>
-                </div>
-            `;
-            document.getElementById('content-area').innerHTML = uiHtml;
-
-            // Timer Engine
-            let display = document.getElementById('timer-display');
-            let peringatan1Menit = false;
-
-            examTimer = setInterval(() => {
-                let h = Math.floor(sisaDetik / 3600);
-                let m = Math.floor((sisaDetik % 3600) / 60);
-                let s = sisaDetik % 60;
-                display.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-                
-                if (sisaDetik === 60 && !peringatan1Menit) {
-                    peringatan1Menit = true;
-                    alert("Waktu tersisa 1 menit! Sistem akan otomatis mengumpulkan jawaban Anda.");
-                }
-                if (sisaDetik <= 0) {
-                    clearInterval(examTimer);
-                    alert("WAKTU HABIS! Sistem melakukan Kumpul Otomatis.");
-                    kumpulUjian();
-                }
-                sisaDetik--;
-            }, 1000);
-        }
-
-        /* --- ANTI-CHEAT ENGINE --- */
-        function picuAntiCheat(pesan) {
-            try {
-                let speech = new SpeechSynthesisUtterance("Peringatan! Pelanggaran Ujian Terdeteksi.");
-                speech.lang = 'id-ID'; window.speechSynthesis.speak(speech);
-            } catch(e){}
-            alert("🚨 PELANGGARAN: " + pesan);
-        }
-
-        document.addEventListener("visibilitychange", () => {
-            if (document.hidden && isExamActive) picuAntiCheat("Anda dilarang berpindah Tab atau Aplikasi selama ujian (Mencegah pencarian AI/Google)!");
-        });
-        document.addEventListener("contextmenu", (e) => { if(isExamActive) { e.preventDefault(); } });
-        document.addEventListener("keydown", (e) => {
-            if (isExamActive && (e.key === 'PrintScreen' || (e.ctrlKey && ['c','v','s','p'].includes(e.key.toLowerCase())))) {
-                e.preventDefault(); navigator.clipboard.writeText(''); picuAntiCheat("Dilarang mengambil foto layar (Screenshot) / Menyalin Soal!");
-            }
-        });
-
-        /* --- SUBMIT & HASIL REVIEW --- */
-        function kumpulUjian() {
-            clearInterval(examTimer);
-            isExamActive = false;
-            document.getElementById('topbar-warning').classList.add('hidden-section');
-            document.getElementById('sidebar').classList.remove('hidden-section');
-
-            let form = document.getElementById('form-lembar-ujian');
-            let formData = new FormData(form);
-            let benar = 0; let salah = 0;
-            
-            // Build Review UI (Green/Red indicators)
-            let reviewHtml = `<div class="max-w-4xl mx-auto"><h2 class="text-3xl font-bold text-slate-800 mb-6">Hasil & Review Ujian</h2>`;
-
-            db.soal.forEach((s, idx) => {
-                let jwbSiswa = formData.get(`ans_${s.id}`) || "";
-                let isBenar = false;
-                
-                if (s.tipe === 'PG') {
-                    isBenar = (jwbSiswa === s.kunci);
-                } else {
-                    // Logika Essay (Simulasi, dianggap benar jika panjang huruf mencukupi dan mengandung keyword tertentu. Untuk akurasi mutlak butuh AI/Guru).
-                    // Disini disimulasikan mengecek apakah string tidak kosong dan mendekati kunci.
-                    isBenar = (jwbSiswa.trim().length > 10); // Simulasi
-                }
-                
-                if (isBenar) benar++; else salah++;
-
-                reviewHtml += `
-                    <div class="bg-white p-6 rounded-xl shadow-sm border ${isBenar ? 'border-emerald-500' : 'border-red-500'} mb-4">
-                        <p class="font-bold mb-2">${idx+1}. ${s.tanya}</p>
-                        <div class="p-3 rounded text-sm ${isBenar ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">
-                            <strong>Jawaban Anda:</strong> ${jwbSiswa || "Tidak Menjawab"}<br>
-                            ${!isBenar ? `<span class="mt-2 block font-bold text-emerald-600">Kunci Benar Admin: ${s.kunci}</span>` : `<span class="mt-2 block font-bold">BENAR</span>`}
-                        </div>
-                    </div>
-                `;
-            });
-
-            // Kalkulasi (Soal: 4 = Nilai 100) -> Nilai per soal = 100 / total
-            let bobot = 100 / db.soal.length;
-            let nilaiAkhir = Math.round(benar * bobot);
-
-            db.hasilUjian.push({ id: Date.now(), nama: currentUser.name, benar, salah, nilai: nilaiAkhir, tgl: new Date().toLocaleDateString() });
-            saveData();
-
-            reviewHtml += `
-                <div class="bg-slate-900 text-white p-6 rounded-xl text-center shadow-xl mt-6">
-                    <h3 class="text-xl uppercase tracking-widest text-slate-400">Total Nilai Ujian</h3>
-                    <div class="text-6xl font-bold text-primary my-2">${nilaiAkhir}</div>
-                    <p>Benar: <span class="text-emerald-400 font-bold">${benar}</span> | Salah: <span class="text-red-400 font-bold">${salah}</span></p>
-                </div></div>
-            `;
-            document.getElementById('content-area').innerHTML = reviewHtml;
-        }
-
-        /* ================= FITUR 7: LAPORAN NILAI ================= */
-        function renderLaporan() {
-            let html = `
-                <div class="flex justify-between items-end mb-6">
-                    <div>
-                        <h2 class="text-2xl font-bold text-slate-800">Laporan Otomatis Nilai Siswa</h2>
-                        <p class="text-sm text-slate-500">Formula: (Benar / Total Soal) * 100</p>
-                    </div>
-                </div>
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <table>
-                        <thead><tr><th>Tanggal</th><th>Nama Siswa</th><th>Benar</th><th>Salah</th><th>Nilai Akhir</th><th>Aksi</th></tr></thead>
-                        <tbody>${db.hasilUjian.map(h => `
-                            <tr>
-                                <td>${h.tgl}</td><td class="font-bold">${h.nama}</td><td class="text-emerald-600 font-bold">${h.benar}</td><td class="text-red-600 font-bold">${h.salah}</td>
-                                <td class="text-xl font-black text-primary">${h.nilai}</td>
-                                <td><button onclick="hapusData('hasilUjian', ${h.id}, renderLaporan)" class="bg-red-500 text-white px-2 py-1 rounded text-xs">HAPUS</button></td>
-                            </tr>
-                        `).join('') || `<tr><td colspan="6" class="text-center py-4">Belum ada data nilai</td></tr>`}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            setContent(html);
-        }
-
-        /* --- GLOBAL UTILS --- */
-        function hapusData(tabel, id, callback) {
-            if(confirm('Yakin ingin menghapus data ini?')) {
-                db[tabel] = db[tabel].filter(x => x.id !== id);
-                saveData(); callback();
-            }
-        }
-
-        function viewImage(base64) {
-            let overlay = document.createElement('div');
-            overlay.className = 'modal-overlay';
-            overlay.onclick = () => document.body.removeChild(overlay);
-            overlay.innerHTML = `<img src="${base64}" class="max-w-[90%] max-h-[90%] border-4 border-white rounded shadow-2xl">`;
-            document.body.appendChild(overlay);
+            }, 50);
         }
     </script>
 </body>
