@@ -1,9 +1,6 @@
 package bioskop;
 
 import javax.imageio.ImageIO;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -17,18 +14,24 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 /**
  * Modern Bioskop Aldo App
- * 100% Berjalan di NetBeans IDE 8.2 + Terintegrasi Link Streaming YouTube
+ * Kompatibel 100% dengan NetBeans IDE 8.2 & Terhubung ke GitHub Pages
  */
 public class Bioskop {
+
+    // URL Web HTML Bioskop Aldo di GitHub Pages
+    static final String GITHUB_WEB_URL = "https://GANTI_DENGAN_LINK_GITHUB_PAGES_KAMU";
 
     // Format Tanggal Otomatis
     static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MMMM yyyy");
     static String tanggalHariIni = LocalDate.now().format(dtf);
 
-    // Data Film Global (Nama, Genre, Harga, Poster URL, Link YouTube Langsung)
+    // Data Film & Link YouTube
     static String[] namaFilm = {
         "Avatar: The Way of Water",
         "John Wick 4",
@@ -40,17 +43,12 @@ public class Bioskop {
         "Action / Mecha"
     };
     static int[] hargaFilm = {55000, 50000, 45000};
-    static String[] gambarLokal = {
-        "assets/film1.png",
-        "assets/film2.png",
-        "assets/film3.png"
+    static String[] youtubeIds = {
+        "LU5nxqxucWY",
+        "ZsILQqRpMp0",
+        "Gh44m59Jolc"
     };
-    static String[] posterUrl = {
-        "https://img.youtube.com/vi/LU5nxqxucWY/hqdefault.jpg",
-        "https://img.youtube.com/vi/ZsILQqRpMp0/hqdefault.jpg",
-        "https://img.youtube.com/vi/Gh44m59Jolc/hqdefault.jpg"
-    };
-    static String[] linkYoutubeFilm = {
+    static String[] youtubeLinks = {
         "https://youtu.be/LU5nxqxucWY?si=3vpA7S2ZkXX15CGO",
         "https://youtu.be/ZsILQqRpMp0?si=dYIxz_yya-2l7ccn",
         "https://youtu.be/Gh44m59Jolc?si=oF9bqp1HExiKuTRr"
@@ -79,7 +77,7 @@ public class Bioskop {
     static class LoginFrame extends JFrame {
         public LoginFrame() {
             setTitle("Login - Bioskop Aldo");
-            setSize(450, 350);
+            setSize(450, 360);
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             setLocationRelativeTo(null);
             setLayout(new BorderLayout());
@@ -144,7 +142,7 @@ public class Bioskop {
 
         public MainFrame() {
             setTitle("Menu Utama - Bioskop Aldo");
-            setSize(780, 620);
+            setSize(820, 630);
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             setLocationRelativeTo(null);
             setLayout(new BorderLayout());
@@ -172,7 +170,7 @@ public class Bioskop {
             filmPanel.setLayout(new BoxLayout(filmPanel, BoxLayout.Y_AXIS));
 
             for (int i = 0; i < namaFilm.length; i++) {
-                final int idx = i;
+                final int index = i;
                 JPanel card = new JPanel(new BorderLayout(15, 15));
                 card.setBackground(Color.WHITE);
                 card.setBorder(BorderFactory.createCompoundBorder(
@@ -180,39 +178,11 @@ public class Bioskop {
                         BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1)
                 ));
 
-                // Gambar Poster (Otomatis muat dari lokal atau URL Poster YouTube)
-                JLabel lblGambar = new JLabel("MEMUAT...", SwingConstants.CENTER);
-                lblGambar.setPreferredSize(new Dimension(110, 140));
-                lblGambar.setOpaque(true);
-                lblGambar.setBackground(Color.DARK_GRAY);
-                lblGambar.setForeground(Color.WHITE);
-
-                new Thread(() -> {
-                    try {
-                        Image img = null;
-                        File imgFile = new File(gambarLokal[idx]);
-                        if (imgFile.exists()) {
-                            img = ImageIO.read(imgFile);
-                        } else {
-                            BufferedImage urlImg = ImageIO.read(new URL(posterUrl[idx]));
-                            if (urlImg != null) {
-                                img = urlImg;
-                            }
-                        }
-                        if (img != null) {
-                            Image scaled = img.getScaledInstance(110, 140, Image.SCALE_SMOOTH);
-                            SwingUtilities.invokeLater(() -> {
-                                lblGambar.setIcon(new ImageIcon(scaled));
-                                lblGambar.setText("");
-                            });
-                        } else {
-                            SwingUtilities.invokeLater(() -> lblGambar.setText("GAMBAR FILM"));
-                        }
-                    } catch (Exception ex) {
-                        SwingUtilities.invokeLater(() -> lblGambar.setText("GAMBAR FILM"));
-                    }
-                }).start();
-
+                // Poster Film (Otomatis dari Thumbnail YouTube + Fallback Poster Grafis)
+                JLabel lblGambar = new JLabel();
+                lblGambar.setPreferredSize(new Dimension(110, 145));
+                lblGambar.setIcon(buatPosterCadangan(namaFilm[i], i));
+                muatThumbnailYouTubeAsync(youtubeIds[i], lblGambar);
                 card.add(lblGambar, BorderLayout.WEST);
 
                 // Info Film
@@ -224,7 +194,7 @@ public class Bioskop {
 
                 JLabel lblJenis = new JLabel("Genre: " + jenisFilm[i]);
 
-                String tglTerbit = LocalDate.now().minusDays(5 * (i + 1)).format(dtf);
+                String tglTerbit = LocalDate.now().minusDays(5L * (i + 1)).format(dtf);
                 JLabel lblTerbit = new JLabel("Rilis: " + tglTerbit);
 
                 JLabel lblHarga = new JLabel("Harga: Rp " + hargaFilm[i]);
@@ -237,12 +207,12 @@ public class Bioskop {
                 infoPanel.add(lblHarga);
                 card.add(infoPanel, BorderLayout.CENTER);
 
-                // Input Pesanan > 1
+                // Input Pesanan
                 JPanel orderPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
                 orderPanel.setBackground(Color.WHITE);
                 orderPanel.add(new JLabel("Pesan Tiket: "));
-                spinners[i] = new JSpinner(new SpinnerNumberModel(0, 0, 10, 1));
-                orderPanel.add(spinners[i]);
+                spinners[index] = new JSpinner(new SpinnerNumberModel(0, 0, 10, 1));
+                orderPanel.add(spinners[index]);
                 card.add(orderPanel, BorderLayout.EAST);
 
                 filmPanel.add(card);
@@ -252,13 +222,14 @@ public class Bioskop {
             scrollPane.getVerticalScrollBar().setUnitIncrement(16);
             add(scrollPane, BorderLayout.CENTER);
 
-            // Footer Tombol
-            JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+            // Footer - Tombol Kontrol
+            JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 10));
             footerPanel.setBackground(Color.WHITE);
 
             JButton btnKembali = new JButton("KEMBALI");
             JButton btnHapus = new JButton("HAPUS PESANAN");
             JButton btnSave = new JButton("SAVE DATA");
+            JButton btnWeb = new JButton("BUKA WEB GITHUB");
             JButton btnLanjut = new JButton("TAMBAH PESANAN & BAYAR");
 
             btnKembali.addActionListener(e -> {
@@ -278,6 +249,8 @@ public class Bioskop {
                 headerDate.setText("Tanggal Hari Ini: " + tanggalHariIni);
                 JOptionPane.showMessageDialog(this, "Data Film & Tanggal berhasil di-save dan diperbarui!");
             });
+
+            btnWeb.addActionListener(e -> bukaBrowser(GITHUB_WEB_URL));
 
             btnLanjut.setBackground(new Color(46, 204, 113));
             btnLanjut.setForeground(Color.WHITE);
@@ -309,6 +282,7 @@ public class Bioskop {
             footerPanel.add(btnKembali);
             footerPanel.add(btnHapus);
             footerPanel.add(btnSave);
+            footerPanel.add(btnWeb);
             footerPanel.add(btnLanjut);
 
             add(footerPanel, BorderLayout.SOUTH);
@@ -321,7 +295,7 @@ public class Bioskop {
     static class PaymentFrame extends JFrame {
         public PaymentFrame(List<String> listPesanan, List<Integer> indexFilmDipilih, int totalHarga) {
             setTitle("Pembayaran - Bioskop Aldo");
-            setSize(500, 500);
+            setSize(520, 500);
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             setLocationRelativeTo(null);
             setLayout(new BorderLayout());
@@ -389,170 +363,157 @@ public class Bioskop {
     }
 
     // ==========================================
-    // 4. HALAMAN PEMUTARAN FILM & NEXT KE FILM BERIKUTNYA
+    // 4. HALAMAN PEMUTARAN SLIDE FILM & AUTO LOGIN
     // ==========================================
     static class PlaybackFrame extends JFrame {
-        int posisiAntrean = 0;
-        int progress = 0;
-        Timer timer;
-        JLabel lblStatus;
-        JLabel lblPoster;
-        JProgressBar progressBar;
-        JButton btnNext;
-        JButton btnBukaYoutube;
+        int slideAktif = 0;
         List<Integer> daftarIndexFilm;
+        JLabel lblSlideInfo;
+        JLabel lblJudulFilm;
+        JLabel lblPosterBesar;
+        JButton btnNextSlide;
+        JButton btnBukaYoutube;
 
         public PlaybackFrame(List<Integer> indexFilmDipilih) {
             this.daftarIndexFilm = indexFilmDipilih;
 
             setTitle("Bioskop Aldo - Sedang Menonton");
-            setSize(680, 480);
+            setSize(700, 480);
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             setLocationRelativeTo(null);
             setLayout(new BorderLayout(10, 10));
             getContentPane().setBackground(Color.BLACK);
 
-            lblStatus = new JLabel("MEMPERSIAPKAN FILM...", SwingConstants.CENTER);
-            lblStatus.setFont(new Font("Arial", Font.BOLD, 22));
-            lblStatus.setForeground(Color.WHITE);
-            lblStatus.setBorder(new EmptyBorder(15, 10, 5, 10));
-            add(lblStatus, BorderLayout.NORTH);
+            lblSlideInfo = new JLabel("", SwingConstants.CENTER);
+            lblSlideInfo.setFont(new Font("Arial", Font.BOLD, 16));
+            lblSlideInfo.setForeground(new Color(231, 76, 60));
+            lblSlideInfo.setBorder(new EmptyBorder(15, 10, 5, 10));
+            add(lblSlideInfo, BorderLayout.NORTH);
 
-            // Panel Tengah (Poster Film & Tombol Kontrol Streaming)
             JPanel centerPanel = new JPanel(new BorderLayout(10, 10));
             centerPanel.setBackground(Color.BLACK);
 
-            lblPoster = new JLabel("", SwingConstants.CENTER);
-            centerPanel.add(lblPoster, BorderLayout.CENTER);
+            lblPosterBesar = new JLabel("", SwingConstants.CENTER);
+            centerPanel.add(lblPosterBesar, BorderLayout.CENTER);
 
-            JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
-            btnPanel.setBackground(Color.BLACK);
+            lblJudulFilm = new JLabel("", SwingConstants.CENTER);
+            lblJudulFilm.setFont(new Font("Arial", Font.BOLD, 22));
+            lblJudulFilm.setForeground(Color.WHITE);
+            centerPanel.add(lblJudulFilm, BorderLayout.SOUTH);
 
-            btnBukaYoutube = new JButton("TAYANGKAN VIDEO (YOUTUBE)");
+            add(centerPanel, BorderLayout.CENTER);
+
+            JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
+            controlPanel.setBackground(new Color(20, 20, 20));
+
+            btnBukaYoutube = new JButton("PUTAR VIDEO YOUTUBE DI BROWSER");
             btnBukaYoutube.setBackground(new Color(41, 128, 185));
             btnBukaYoutube.setForeground(Color.WHITE);
             btnBukaYoutube.setFont(new Font("Arial", Font.BOLD, 13));
 
-            btnNext = new JButton("NEXT FILM >>");
-            btnNext.setBackground(new Color(231, 76, 60));
-            btnNext.setForeground(Color.WHITE);
-            btnNext.setFont(new Font("Arial", Font.BOLD, 14));
+            btnNextSlide = new JButton("NEXT SLIDE >>");
+            btnNextSlide.setBackground(new Color(229, 9, 20));
+            btnNextSlide.setForeground(Color.WHITE);
+            btnNextSlide.setFont(new Font("Arial", Font.BOLD, 14));
 
-            btnPanel.add(btnBukaYoutube);
-            btnPanel.add(btnNext);
-            centerPanel.add(btnPanel, BorderLayout.SOUTH);
-
-            add(centerPanel, BorderLayout.CENTER);
-
-            progressBar = new JProgressBar(0, 100);
-            progressBar.setStringPainted(true);
-            progressBar.setForeground(Color.RED);
-            progressBar.setBackground(Color.DARK_GRAY);
-            add(progressBar, BorderLayout.SOUTH);
-
-            // Aksi Buka Video YouTube Langsung Tanpa Download
             btnBukaYoutube.addActionListener(e -> {
-                if (posisiAntrean < daftarIndexFilm.size()) {
-                    int filmIdx = daftarIndexFilm.get(posisiAntrean);
-                    bukaLinkBrowser(linkYoutubeFilm[filmIdx]);
-                }
+                int filmIdx = daftarIndexFilm.get(slideAktif);
+                bukaBrowser(youtubeLinks[filmIdx]);
             });
 
-            // Aksi Tombol NEXT FILM
-            btnNext.addActionListener(e -> {
-                progress = 0;
-                posisiAntrean++;
-                if (posisiAntrean < daftarIndexFilm.size()) {
-                    muatFilmSekarang(true);
+            btnNextSlide.addActionListener(e -> {
+                if (slideAktif < daftarIndexFilm.size() - 1) {
+                    slideAktif++;
+                    tampilkanSlide(slideAktif);
                 } else {
                     selesaiMenonton();
                 }
             });
 
-            // Timer otomatis berjalan
-            timer = new Timer(120, new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (posisiAntrean < daftarIndexFilm.size()) {
-                        progress++;
-                        progressBar.setValue(progress);
-                        if (progress >= 100) {
-                            progress = 0;
-                            posisiAntrean++;
-                            if (posisiAntrean < daftarIndexFilm.size()) {
-                                muatFilmSekarang(true);
-                            } else {
-                                selesaiMenonton();
-                            }
-                        }
-                    }
-                }
-            });
+            controlPanel.add(btnBukaYoutube);
+            controlPanel.add(btnNextSlide);
+            add(controlPanel, BorderLayout.SOUTH);
 
-            // Mulai film pertama
-            muatFilmSekarang(true);
-            timer.start();
+            tampilkanSlide(0);
         }
 
-        private void muatFilmSekarang(boolean autoBukaBrowser) {
-            int filmIdx = daftarIndexFilm.get(posisiAntrean);
-            lblStatus.setText("SEDANG MEMUTAR (" + (posisiAntrean + 1) + "/" + daftarIndexFilm.size() + "): " + namaFilm[filmIdx]);
+        private void tampilkanSlide(int idx) {
+            int filmIdx = daftarIndexFilm.get(idx);
+            lblSlideInfo.setText("SLIDE " + (idx + 1) + " DARI " + daftarIndexFilm.size());
+            lblJudulFilm.setText("SEDANG MEMUTAR: " + namaFilm[filmIdx]);
+            lblPosterBesar.setIcon(buatPosterCadangan(namaFilm[filmIdx], filmIdx));
+            muatThumbnailYouTubeAsync(youtubeIds[filmIdx], lblPosterBesar);
 
-            if (posisiAntrean == daftarIndexFilm.size() - 1) {
-                btnNext.setText("SELESAI MENONTON >>");
+            if (idx < daftarIndexFilm.size() - 1) {
+                btnNextSlide.setText("NEXT SLIDE (" + namaFilm[daftarIndexFilm.get(idx + 1)] + ") >>");
             } else {
-                btnNext.setText("NEXT FILM >>");
-            }
-
-            // Tampilkan poster film yang sedang diputar
-            new Thread(() -> {
-                try {
-                    BufferedImage img = ImageIO.read(new URL(posterUrl[filmIdx]));
-                    if (img != null) {
-                        Image scaled = img.getScaledInstance(320, 200, Image.SCALE_SMOOTH);
-                        SwingUtilities.invokeLater(() -> lblPoster.setIcon(new ImageIcon(scaled)));
-                    }
-                } catch (Exception ignored) {}
-            }).start();
-
-            if (autoBukaBrowser) {
-                bukaLinkBrowser(linkYoutubeFilm[filmIdx]);
+                btnNextSlide.setText("SELESAI MENONTON");
             }
         }
 
         private void selesaiMenonton() {
-            timer.stop();
-            lblPoster.setVisible(false);
+            lblSlideInfo.setText("");
+            lblPosterBesar.setIcon(null);
             btnBukaYoutube.setVisible(false);
-            btnNext.setVisible(false);
-            progressBar.setVisible(false);
+            btnNextSlide.setVisible(false);
+            lblJudulFilm.setText("<html><center>Terimakasih udah menonton<br>Bioskop aldo</center></html>");
 
-            lblStatus.setText("<html><center><br><br>Terimakasih udah menonton<br>Bioskop aldo<br><br><font size='4' color='#bdc3c7'>Kembali otomatis ke Menu Utama Login Customer...</font></center></html>");
-
-            // Otomatis kembali ke Halaman Login Customer setelah 3 detik
-            Timer timerKembali = new Timer(3000, evt -> {
-                dispose();
-                new LoginFrame().setVisible(true);
+            // Otomatis kembali ke Menu Login Customer setelah 3 detik
+            Timer timerKembali = new Timer(3000, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    dispose();
+                    new LoginFrame().setVisible(true);
+                }
             });
             timerKembali.setRepeats(false);
             timerKembali.start();
         }
     }
 
-    // Membuka Link Film YouTube Langsung di Browser
-    public static void bukaLinkBrowser(String url) {
+    // ==========================================
+    // 5. UTILITAS GAMBAR, BROWSER & AUDIO
+    // ==========================================
+    public static void muatThumbnailYouTubeAsync(String videoId, JLabel targetLabel) {
+        new Thread(() -> {
+            try {
+                URL url = new URL("https://img.youtube.com/vi/" + videoId + "/hqdefault.jpg");
+                BufferedImage img = ImageIO.read(url);
+                if (img != null) {
+                    int w = targetLabel.getWidth() > 0 ? targetLabel.getWidth() : 110;
+                    int h = targetLabel.getHeight() > 0 ? targetLabel.getHeight() : 145;
+                    Image scaled = img.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+                    SwingUtilities.invokeLater(() -> targetLabel.setIcon(new ImageIcon(scaled)));
+                }
+            } catch (Exception ignored) {
+            }
+        }).start();
+    }
+
+    public static ImageIcon buatPosterCadangan(String judul, int nomor) {
+        BufferedImage img = new BufferedImage(110, 145, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2 = img.createGraphics();
+        Color[] warna = {new Color(26, 82, 118), new Color(120, 40, 31), new Color(29, 131, 72)};
+        g2.setColor(warna[nomor % warna.length]);
+        g2.fillRect(0, 0, 110, 145);
+        g2.setColor(Color.WHITE);
+        g2.setFont(new Font("Arial", Font.BOLD, 12));
+        g2.drawString("BIOSKOP ALDO", 10, 30);
+        g2.drawString("FILM #" + (nomor + 1), 10, 55);
+        g2.dispose();
+        return new ImageIcon(img);
+    }
+
+    public static void bukaBrowser(String url) {
         try {
             if (Desktop.isDesktopSupported()) {
                 Desktop.getDesktop().browse(new URI(url));
             }
         } catch (Exception e) {
-            System.out.println("Gagal membuka link: " + url);
+            JOptionPane.showMessageDialog(null, "Silakan buka link ini di browser:\n" + url);
         }
     }
 
-    // ==========================================
-    // 5. FITUR AUDIO (SOUND EFFECT)
-    // ==========================================
     public static void playSound(String filepath) {
         try {
             File audioFile = new File(filepath);
@@ -561,8 +522,6 @@ public class Bioskop {
                 Clip clip = AudioSystem.getClip();
                 clip.open(audioStream);
                 clip.start();
-            } else {
-                Toolkit.getDefaultToolkit().beep();
             }
         } catch (Exception e) {
             e.printStackTrace();
