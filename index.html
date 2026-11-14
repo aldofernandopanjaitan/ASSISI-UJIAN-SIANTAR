@@ -3,177 +3,856 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bioskop Aldo</title>
+    <title>Bioskop Aldo - Pemesanan & Pemutaran Film</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 0; }
-        .hidden { display: none !important; }
-        
-        /* Layar Login */
-        #login-screen { display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .login-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; width: 300px; }
-        .login-box input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
-        .btn-blue { background: #1e90ff; color: white; border: none; padding: 10px 20px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; border-radius: 4px; }
-        
-        /* Header Utama */
-        .header { background: #2c3e50; color: white; text-align: center; padding: 20px; }
-        .header h1 { margin: 0; font-size: 28px; }
-        .header p { margin: 5px 0 0; color: #bdc3c7; }
-        
-        /* Daftar Film */
-        .film-container { max-width: 800px; margin: 20px auto; }
-        .film-card { background: white; margin-bottom: 15px; padding: 15px; border: 1px solid #ddd; display: flex; align-items: center; justify-content: space-between; }
-        .film-info { flex-grow: 1; margin-left: 20px; }
-        .film-info h2 { margin: 0 0 5px; font-size: 18px; }
-        .film-info p { margin: 2px 0; font-size: 14px; color: #555; }
-        .film-info .harga { color: #27ae60; font-weight: bold; }
-        .film-img { width: 100px; height: 140px; background: #333; color: white; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 12px; }
-        
-        /* Footer/Navigasi */
-        .footer { text-align: center; margin: 20px; padding-bottom: 20px; }
-        .btn-green { background: #2ecc71; color: white; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 4px; }
-        .btn-gray { background: #ccc; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
-        
-        /* Layar Nonton */
-        #playback-screen { text-align: center; background: #000; color: white; height: 100vh; padding-top: 20px; }
-        iframe { width: 80%; height: 60vh; border: none; margin-top: 20px; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background-color: #eef1f5;
+            color: #000000;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* =========================================
+           1. HALAMAN LOGIN (SESUAI NETBEANS)
+           ========================================= */
+        .login-box {
+            background: #ffffff;
+            width: 100%;
+            max-width: 450px;
+            border-radius: 8px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border: 1px solid #d0d7de;
+        }
+
+        .login-body {
+            padding: 35px 45px 25px 45px;
+        }
+
+        .login-title {
+            text-align: center;
+            font-size: 26px;
+            font-weight: bold;
+            color: #000000;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            color: #000000;
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #000000;
+            border: 1px solid #999999;
+            border-radius: 4px;
+            background: #ffffff;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #1e90ff;
+            box-shadow: 0 0 0 2px rgba(30, 144, 255, 0.2);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background-color: #1e90ff; /* Dodger Blue */
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-login:hover {
+            background-color: #187bcd;
+        }
+
+        /* =========================================
+           2. HALAMAN UTAMA (PILIH FILM)
+           ========================================= */
+        .main-container {
+            background: #f5f5f5;
+            width: 100%;
+            max-width: 960px;
+            border-radius: 8px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border: 1px solid #cccccc;
+        }
+
+        .main-header {
+            background-color: #2c3e50;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px 15px;
+        }
+
+        .main-header h1 {
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .main-header p {
+            font-size: 14px;
+            color: #d3d3d3;
+        }
+
+        .film-list {
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .film-card {
+            background: #ffffff;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .film-poster {
+            width: 105px;
+            height: 145px;
+            object-fit: cover;
+            background-color: #333333;
+            border-radius: 4px;
+            flex-shrink: 0;
+            border: 1px solid #bbbbbb;
+        }
+
+        .film-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .film-info h2 {
+            font-size: 19px;
+            font-weight: bold;
+            color: #000000;
+        }
+
+        .film-info .meta {
+            font-size: 13px;
+            color: #333333;
+        }
+
+        .film-info .price {
+            font-size: 15px;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .film-order {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .film-order label {
+            font-size: 14px;
+            color: #000000;
+        }
+
+        .qty-control {
+            display: flex;
+            align-items: center;
+            border: 1px solid #999999;
+            border-radius: 4px;
+            overflow: hidden;
+            background: #ffffff;
+        }
+
+        .qty-control button {
+            width: 28px;
+            height: 30px;
+            border: none;
+            background: #e9ecef;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .qty-control button:hover {
+            background: #d6d8db;
+        }
+
+        .qty-control input {
+            width: 40px;
+            height: 30px;
+            text-align: center;
+            border: none;
+            font-weight: bold;
+            font-size: 14px;
+            color: #000000;
+        }
+
+        .main-footer {
+            background: #ffffff;
+            padding: 15px 20px;
+            border-top: 1px solid #dddddd;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .btn-action {
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: bold;
+            border: 1px solid #b0b0b0;
+            border-radius: 4px;
+            background: #f0f0f0;
+            color: #000000;
+            cursor: pointer;
+        }
+
+        .btn-action:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-pay-next {
+            background-color: #2ecc71;
+            color: #ffffff;
+            border: none;
+            font-size: 14px;
+            padding: 10px 22px;
+        }
+
+        .btn-pay-next:hover {
+            background-color: #27ae60;
+        }
+
+        /* =========================================
+           3. HALAMAN PEMBAYARAN
+           ========================================= */
+        .payment-box {
+            background: #ffffff;
+            width: 100%;
+            max-width: 520px;
+            border-radius: 8px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            padding: 25px 30px;
+            border: 1px solid #cccccc;
+        }
+
+        .payment-title {
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 18px;
+            color: #000000;
+        }
+
+        .receipt-area {
+            width: 100%;
+            background: #f8f9fa;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            padding: 12px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            white-space: pre-line;
+        }
+
+        .total-label {
+            text-align: center;
+            font-size: 21px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 18px;
+        }
+
+        .payment-method {
+            margin-bottom: 20px;
+        }
+
+        .payment-method label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .payment-method select {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            border: 1px solid #999999;
+            border-radius: 4px;
+        }
+
+        .payment-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .btn-confirm {
+            background-color: #2980b9;
+            color: #ffffff;
+            border: none;
+            padding: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-confirm:hover {
+            background-color: #1f6391;
+        }
+
+        /* =========================================
+           4. HALAMAN PEMUTARAN FILM (THEATER SLIDE)
+           ========================================= */
+        .theater-box {
+            background: #000000;
+            color: #ffffff;
+            width: 100%;
+            max-width: 900px;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            border: 2px solid #2c3e50;
+        }
+
+        .theater-header {
+            background: #141414;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-bottom: 1px solid #333333;
+        }
+
+        .slide-badge {
+            background: #e50914;
+            color: #ffffff;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .now-playing-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* Rasio 16:9 */
+            background: #000000;
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .theater-controls {
+            background: #141414;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .direct-yt-link {
+            color: #63b3ed;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .direct-yt-link:hover {
+            text-decoration: underline;
+        }
+
+        .btn-next-slide {
+            background-color: #e50914;
+            color: #ffffff;
+            border: none;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-next-slide:hover {
+            background-color: #b80710;
+        }
+
+        .thank-you-screen {
+            padding: 90px 20px;
+            text-align: center;
+            background: #000000;
+        }
+
+        .thank-you-screen h2 {
+            font-size: 30px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        .thank-you-screen p {
+            color: #aaaaaa;
+            font-size: 15px;
+        }
+
+        @media (max-width: 640px) {
+            .film-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .film-poster {
+                width: 100%;
+                height: 180px;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <!-- 1. HALAMAN LOGIN -->
-    <div id="login-screen">
-        <div class="login-box">
-            <h2>LOGIN BIOSKOP ALDO</h2>
-            <input type="text" id="username" placeholder="Username (aldo)">
-            <input type="password" id="password" placeholder="Password (aldo123)">
-            <button class="btn-blue" onclick="login()">MASUK</button>
+    <!-- ==========================================
+         1. HALAMAN LOGIN CUSTOMER
+         ========================================== -->
+    <div id="loginSection" class="login-box">
+        <div class="login-body">
+            <div class="login-title">LOGIN BIOSKOP ALDO</div>
+            <div class="form-group">
+                <label for="txtUser">Username (aldo):</label>
+                <input type="text" id="txtUser" placeholder="Masukkan username">
+            </div>
+            <div class="form-group">
+                <label for="txtPass">Password (aldo123):</label>
+                <input type="password" id="txtPass" placeholder="Masukkan password">
+            </div>
         </div>
+        <button class="btn-login" onclick="prosesLogin()">MASUK</button>
     </div>
 
-    <!-- 2. HALAMAN UTAMA (PILIH FILM) -->
-    <div id="main-screen" class="hidden">
-        <div class="header">
+    <!-- ==========================================
+         2. HALAMAN UTAMA (MENU PILIH FILM)
+         ========================================== -->
+    <div id="mainSection" class="main-container hidden">
+        <div class="main-header">
             <h1>BIOSKOP ALDO</h1>
-            <p id="tanggal-hari-ini"></p>
+            <p id="headerDate">Tanggal Hari Ini: -</p>
         </div>
-        <div class="film-container" id="film-list">
-            <!-- Film dirender lewat JavaScript -->
+
+        <div id="filmListContainer" class="film-list">
+            <!-- Kartu film dirender otomatis oleh JavaScript -->
         </div>
-        <div class="footer">
-            <button class="btn-gray" onclick="logout()">KEMBALI</button>
-            <button class="btn-gray" onclick="resetPesanan()">HAPUS PESANAN</button>
-            <button class="btn-green" onclick="lanjutBayar()">TAMBAH PESANAN & BAYAR</button>
+
+        <div class="main-footer">
+            <button class="btn-action" onclick="kembaliKeLogin()">KEMBALI</button>
+            <button class="btn-action" onclick="hapusPesanan()">HAPUS PESANAN</button>
+            <button class="btn-action" onclick="saveData()">SAVE DATA</button>
+            <button class="btn-action btn-pay-next" onclick="lanjutPembayaran()">TAMBAH PESANAN &amp; BAYAR</button>
         </div>
     </div>
 
-    <!-- 3. HALAMAN NONTON -->
-    <div id="playback-screen" class="hidden">
-        <h2 id="now-playing">SEDANG MEMUTAR FILM...</h2>
-        <div id="video-container"></div>
-        <br><br>
-        <button class="btn-gray" onclick="kembaliKeMenu()">KEMBALI KE LAYAR UTAMA</button>
+    <!-- ==========================================
+         3. HALAMAN PEMBAYARAN
+         ========================================== -->
+    <div id="paymentSection" class="payment-box hidden">
+        <div class="payment-title">DETAIL PEMBAYARAN</div>
+        <div id="receiptArea" class="receipt-area"></div>
+        <div id="totalLabel" class="total-label">Total Bayar: Rp 0</div>
+
+        <div class="payment-method">
+            <label for="comboMetode">Pilih Metode Pembayaran:</label>
+            <select id="comboMetode">
+                <option value="DANA QR">DANA QR</option>
+                <option value="GOPAY QR">GOPAY QR</option>
+                <option value="OVO QR">OVO QR</option>
+                <option value="Mobile Banking BCA">Mobile Banking BCA</option>
+                <option value="Mobile Banking MANDIRI">Mobile Banking MANDIRI</option>
+                <option value="Mobile Banking BNI">Mobile Banking BNI</option>
+                <option value="Mobile Banking BRI">Mobile Banking BRI</option>
+            </select>
+        </div>
+
+        <div class="payment-buttons">
+            <button class="btn-action" onclick="kembaliKeMenu()">Kembali</button>
+            <button class="btn-confirm" onclick="prosesBayar()">BAYAR SEKARANG</button>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         4. HALAMAN PEMUTARAN FILM (SLIDE YOUTUBE)
+         ========================================== -->
+    <div id="theaterSection" class="theater-box hidden">
+        <div id="playerActiveArea">
+            <div class="theater-header">
+                <span id="slideBadge" class="slide-badge">SLIDE 1 DARI 1</span>
+                <span id="nowPlayingTitle" class="now-playing-title">SEDANG MEMUTAR: -</span>
+            </div>
+
+            <div class="video-wrapper">
+                <iframe id="youtubePlayer"
+                        src=""
+                        title="Pemutar Film Bioskop Aldo"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen>
+                </iframe>
+            </div>
+
+            <div class="theater-controls">
+                <a id="directYtLink" class="direct-yt-link" href="#" target="_blank" rel="noopener">
+                    Buka langsung di YouTube jika layar dibatasi
+                </a>
+                <button id="btnNextSlide" class="btn-next-slide" onclick="nextSlide()">
+                    NEXT SLIDE ⏭
+                </button>
+            </div>
+        </div>
+
+        <div id="thankYouArea" class="thank-you-screen hidden">
+            <h2>Terimakasih udah menonton<br>Bioskop aldo</h2>
+            <p id="redirectCountdown">Otomatis kembali ke menu utama login customer dalam 3 detik...</p>
+        </div>
     </div>
 
     <script>
-        // Data Film & Link YouTube
-        const films = [
-            { nama: "Avatar: The Way of Water", genre: "Sci-Fi / Action", harga: 55000, rilis: "08 November 2026", link: "https://www.youtube.com/embed/LU5nxqxucWY?autoplay=1" },
-            { nama: "John Wick 4", genre: "Action / Crime", harga: 50000, rilis: "03 November 2026", link: "https://www.youtube.com/embed/ZsILQqRpMp0?autoplay=1" },
-            { nama: "Transformers: Rise", genre: "Action / Mecha", harga: 45000, rilis: "29 Oktober 2026", link: "https://www.youtube.com/embed/Gh44m59Jolc?autoplay=1" }
+        // ==========================================
+        // DATA FILM & LINK YOUTUBE LANGSUNG TAYANG
+        // ==========================================
+        const daftarFilm = [
+            {
+                id: 0,
+                nama: "Avatar: The Way of Water",
+                genre: "Sci-Fi / Action",
+                harga: 55000,
+                hariLalu: 5,
+                youtubeId: "LU5nxqxucWY",
+                youtubeUrl: "https://youtu.be/LU5nxqxucWY?si=3vpA7S2ZkXX15CGO"
+            },
+            {
+                id: 1,
+                nama: "John Wick 4",
+                genre: "Action / Crime",
+                harga: 50000,
+                hariLalu: 10,
+                youtubeId: "ZsILQqRpMp0",
+                youtubeUrl: "https://youtu.be/ZsILQqRpMp0?si=dYIxz_yya-2l7ccn"
+            },
+            {
+                id: 2,
+                nama: "Transformers: Rise",
+                genre: "Action / Mecha",
+                harga: 45000,
+                hariLalu: 15,
+                youtubeId: "Gh44m59Jolc",
+                youtubeUrl: "https://youtu.be/Gh44m59Jolc?si=oF9bqp1HExiKuTRr"
+            }
         ];
 
-        // Set Tanggal Otomatis
-        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        document.getElementById('tanggal-hari-ini').innerText = "Tanggal Hari Ini: " + new Date().toLocaleDateString('id-ID', options);
+        let antreanFilmDiputar = [];
+        let indexSlideAktif = 0;
 
-        function renderFilms() {
-            const container = document.getElementById("film-list");
+        // ==========================================
+        // FORMAT TANGGAL OTOMATIS INDONESIA
+        // ==========================================
+        function formatTanggalIndonesia(dateObj) {
+            const bulan = [
+                "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+            ];
+            const tgl = String(dateObj.getDate()).padStart(2, "0");
+            const bln = bulan[dateObj.getMonth()];
+            const thn = dateObj.getFullYear();
+            return `${tgl} ${bln} ${thn}`;
+        }
+
+        function getTanggalHariIni() {
+            return formatTanggalIndonesia(new Date());
+        }
+
+        function getTanggalRilis(hariLalu) {
+            const d = new Date();
+            d.setDate(d.getDate() - hariLalu);
+            return formatTanggalIndonesia(d);
+        }
+
+        // ==========================================
+        // EFEK SUARA BIOSKOP (WEB AUDIO API)
+        // ==========================================
+        function playSound() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // Nada D5
+                osc.frequency.setValueAtTime(880, ctx.currentTime + 0.12); // Nada A5
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.4);
+            } catch (e) {
+                // Abaikan jika browser memblokir autoplay audio
+            }
+        }
+
+        // ==========================================
+        // RENDER DAFTAR FILM & GAMBAR OTOMATIS
+        // ==========================================
+        function renderDaftarFilm() {
+            document.getElementById("headerDate").textContent = "Tanggal Hari Ini: " + getTanggalHariIni();
+            const container = document.getElementById("filmListContainer");
             container.innerHTML = "";
-            films.forEach((film, index) => {
-                container.innerHTML += `
-                    <div class="film-card">
-                        <div class="film-img">GAMBAR<br>${film.nama}</div>
-                        <div class="film-info">
-                            <h2>${film.nama}</h2>
-                            <p>Genre: ${film.genre}</p>
-                            <p>Rilis: ${film.rilis}</p>
-                            <p class="harga">Harga: Rp ${film.harga}</p>
-                        </div>
-                        <div>
-                            Pesan Tiket: <input type="number" id="qty-${index}" min="0" max="10" value="0" style="width:50px;">
+
+            const savedQty = JSON.parse(localStorage.getItem("bioskopAldoQty") || "[0,0,0]");
+
+            daftarFilm.forEach((film, idx) => {
+                const thumbUrl = `https://img.youtube.com/vi/${film.youtubeId}/hqdefault.jpg`;
+                const qtyAwal = savedQty[idx] || 0;
+
+                const card = document.createElement("div");
+                card.className = "film-card";
+                card.innerHTML = `
+                    <img class="film-poster"
+                         src="${thumbUrl}"
+                         alt="${film.nama}"
+                         onerror="this.src='https://via.placeholder.com/105x145/2c3e50/ffffff?text=FILM+${idx + 1}'">
+                    <div class="film-info">
+                        <h2>${film.nama}</h2>
+                        <div class="meta">Genre: ${film.genre}</div>
+                        <div class="meta">Rilis: ${getTanggalRilis(film.hariLalu)}</div>
+                        <div class="price">Harga: Rp ${film.harga}</div>
+                    </div>
+                    <div class="film-order">
+                        <label>Pesan Tiket:</label>
+                        <div class="qty-control">
+                            <button type="button" onclick="ubahQty(${idx}, -1)">-</button>
+                            <input type="number" id="qty_${idx}" value="${qtyAwal}" min="0" max="10" readonly>
+                            <button type="button" onclick="ubahQty(${idx}, 1)">+</button>
                         </div>
                     </div>
                 `;
+                container.appendChild(card);
             });
         }
 
-        // Fungsi Login
-        function login() {
-            const user = document.getElementById("username").value;
-            const pass = document.getElementById("password").value;
+        function ubahQty(index, delta) {
+            const input = document.getElementById(`qty_${index}`);
+            let val = parseInt(input.value, 10) || 0;
+            val = Math.min(10, Math.max(0, val + delta));
+            input.value = val;
+        }
+
+        // ==========================================
+        // NAVIGASI HALAMAN & TRANSAKSI
+        // ==========================================
+        function tampilkanHalaman(idHalaman) {
+            ["loginSection", "mainSection", "paymentSection", "theaterSection"].forEach(id => {
+                document.getElementById(id).classList.add("hidden");
+            });
+            document.getElementById(idHalaman).classList.remove("hidden");
+        }
+
+        function prosesLogin() {
+            const user = document.getElementById("txtUser").value.trim();
+            const pass = document.getElementById("txtPass").value.trim();
+
             if (user === "aldo" && pass === "aldo123") {
-                document.getElementById("login-screen").classList.add("hidden");
-                document.getElementById("main-screen").classList.remove("hidden");
-                renderFilms();
+                playSound();
+                renderDaftarFilm();
+                tampilkanHalaman("mainSection");
             } else {
                 alert("Username atau Password Salah!");
             }
         }
 
-        function logout() {
-            document.getElementById("main-screen").classList.add("hidden");
-            document.getElementById("login-screen").classList.remove("hidden");
-            document.getElementById("username").value = "";
-            document.getElementById("password").value = "";
+        function kembaliKeLogin() {
+            document.getElementById("youtubePlayer").src = "";
+            document.getElementById("txtUser").value = "";
+            document.getElementById("txtPass").value = "";
+            tampilkanHalaman("loginSection");
         }
 
-        function resetPesanan() {
-            films.forEach((_, index) => document.getElementById(`qty-${index}`).value = 0);
+        function hapusPesanan() {
+            daftarFilm.forEach((_, idx) => {
+                document.getElementById(`qty_${idx}`).value = 0;
+            });
+            localStorage.removeItem("bioskopAldoQty");
             alert("Semua pesanan dihapus!");
         }
 
-        // Fungsi Bayar & Putar Video
-        function lanjutBayar() {
-            let total = 0;
-            let filmDipilih = null;
+        function saveData() {
+            const currentQty = daftarFilm.map((_, idx) => parseInt(document.getElementById(`qty_${idx}`).value, 10) || 0);
+            localStorage.setItem("bioskopAldoQty", JSON.stringify(currentQty));
+            document.getElementById("headerDate").textContent = "Tanggal Hari Ini: " + getTanggalHariIni();
+            playSound();
+            alert("Data Film & Tanggal berhasil di-save dan diperbarui!");
+        }
 
-            // Cari film pertama yang dipesan untuk diputar
-            films.forEach((film, index) => {
-                let qty = parseInt(document.getElementById(`qty-${index}`).value);
+        function lanjutPembayaran() {
+            let totalHarga = 0;
+            let rincian = `Tanggal Transaksi: ${getTanggalHariIni()}\n\n`;
+            antreanFilmDiputar = [];
+
+            daftarFilm.forEach((film, idx) => {
+                const qty = parseInt(document.getElementById(`qty_${idx}`).value, 10) || 0;
                 if (qty > 0) {
-                    total += (qty * film.harga);
-                    if (!filmDipilih) filmDipilih = film; // Putar film yang pertama diceklis
+                    const sub = qty * film.harga;
+                    totalHarga += sub;
+                    rincian += `- ${film.nama} (x${qty}) = Rp ${sub}\n`;
+                    // Masukkan film ke antrean slide pemutaran
+                    antreanFilmDiputar.push(film);
                 }
             });
 
-            if (total === 0) {
+            if (totalHarga === 0) {
                 alert("Pilih minimal 1 film terlebih dahulu!");
                 return;
             }
 
-            let metode = prompt(`Total Bayar: Rp ${total}\nKetik metode (Contoh: DANA QR / BCA):`, "DANA QR");
-            if (metode) {
-                alert(`Pembayaran berhasil menggunakan ${metode}! Selamat Menonton.`);
-                putarFilm(filmDipilih);
-            }
-        }
-
-        function putarFilm(film) {
-            document.getElementById("main-screen").classList.add("hidden");
-            document.getElementById("playback-screen").classList.remove("hidden");
-            
-            document.getElementById("now-playing").innerText = `SEDANG MEMUTAR: ${film.nama}`;
-            document.getElementById("video-container").innerHTML = `
-                <iframe src="${film.link}" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-            `;
+            document.getElementById("receiptArea").textContent = rincian;
+            document.getElementById("totalLabel").textContent = "Total Bayar: Rp " + totalHarga;
+            tampilkanHalaman("paymentSection");
         }
 
         function kembaliKeMenu() {
-            document.getElementById("playback-screen").classList.add("hidden");
-            document.getElementById("video-container").innerHTML = ""; // Stop video
-            document.getElementById("main-screen").classList.remove("hidden");
-            resetPesanan();
+            tampilkanHalaman("mainSection");
         }
+
+        function prosesBayar() {
+            const metode = document.getElementById("comboMetode").value;
+            playSound();
+            alert(`Pembayaran berhasil menggunakan ${metode} pada ${getTanggalHariIni()}`);
+
+            // Reset tiket tersimpan setelah dibayar
+            localStorage.removeItem("bioskopAldoQty");
+            daftarFilm.forEach((_, idx) => {
+                const el = document.getElementById(`qty_${idx}`);
+                if (el) el.value = 0;
+            });
+
+            // Mulai pemutaran slide film dari Slide 1
+            indexSlideAktif = 0;
+            document.getElementById("playerActiveArea").classList.remove("hidden");
+            document.getElementById("thankYouArea").classList.add("hidden");
+            tampilkanHalaman("theaterSection");
+            muatSlideFilm(indexSlideAktif);
+        }
+
+        // ==========================================
+        // LOGIKA SLIDE PEMUTARAN FILM YOUTUBE
+        // ==========================================
+        function muatSlideFilm(index) {
+            const film = antreanFilmDiputar[index];
+            const totalSlide = antreanFilmDiputar.length;
+
+            document.getElementById("slideBadge").textContent = `SLIDE ${index + 1} DARI ${totalSlide}`;
+            document.getElementById("nowPlayingTitle").textContent = `SEDANG MEMUTAR: ${film.nama}`;
+            document.getElementById("directYtLink").href = film.youtubeUrl;
+
+            // Embed YouTube langsung diputar
+            document.getElementById("youtubePlayer").src =
+                `https://www.youtube.com/embed/${film.youtubeId}?autoplay=1&rel=0`;
+
+            const btnNext = document.getElementById("btnNextSlide");
+            if (index < totalSlide - 1) {
+                const filmBerikutnya = antreanFilmDiputar[index + 1].nama;
+                btnNext.textContent = `NEXT SLIDE (${filmBerikutnya}) ⏭`;
+            } else {
+                btnNext.textContent = "SELESAI MENONTON 🎬";
+            }
+        }
+
+        function nextSlide() {
+            if (indexSlideAktif < antreanFilmDiputar.length - 1) {
+                indexSlideAktif++;
+                muatSlideFilm(indexSlideAktif);
+            } else {
+                // Semua slide film selesai -> tampilkan ucapan & otomatis kembali ke Login Customer
+                document.getElementById("youtubePlayer").src = "";
+                document.getElementById("playerActiveArea").classList.add("hidden");
+                document.getElementById("thankYouArea").classList.remove("hidden");
+
+                let detik = 3;
+                const infoEl = document.getElementById("redirectCountdown");
+                infoEl.textContent = `Otomatis kembali ke menu utama login customer dalam ${detik} detik...`;
+
+                const interval = setInterval(() => {
+                    detik--;
+                    if (detik > 0) {
+                        infoEl.textContent = `Otomatis kembali ke menu utama login customer dalam ${detik} detik...`;
+                    } else {
+                        clearInterval(interval);
+                        kembaliKeLogin();
+                    }
+                }, 1000);
+            }
+        }
+
+        // Tekan Enter saat di form login
+        document.getElementById("txtPass").addEventListener("keyup", function(event) {
+            if (event.key === "Enter") {
+                prosesLogin();
+            }
+        });
     </script>
 </body>
 </html>
