@@ -1,858 +1,1961 @@
-<!DOCTYPE html>
+<?php
+/*
+|--------------------------------------------------------------------------
+| PARKIRPRO MODERN - SINGLE FILE
+| Kompatibel PHP 5.6+ / 7.x / 8.x + MySQL/MariaDB
+| File: Parkir_Modern.php
+|--------------------------------------------------------------------------
+| Login awal:
+| admin   / admin123
+| petugas / admin123
+| owner   / admin123
+|
+| Database dibuat otomatis: parkir_modern
+| Folder foto dibuat otomatis: foto/
+|--------------------------------------------------------------------------
+*/
+
+session_start();
+date_default_timezone_set('Asia/Jakarta');
+
+define('DB_HOST', '127.0.0.1');
+define('DB_NAME', 'parkir_modern');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+
+function e($v) {
+    return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
+}
+
+function db() {
+    static $pdo = null;
+    if ($pdo instanceof PDO) {
+        return $pdo;
+    }
+
+    try {
+        $server = new PDO(
+            'mysql:host=' . DB_HOST . ';charset=utf8mb4',
+            DB_USER,
+            DB_PASS,
+            array(
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => true
+            )
+        );
+
+        $server->exec(
+            "CREATE DATABASE IF NOT EXISTS `" . DB_NAME . "` 
+             CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+        );
+
+        $pdo = new PDO(
+            'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4',
+            DB_USER,
+            DB_PASS,
+            array(
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => true
+            )
+        );
+
+        return $pdo;
+    } catch (Exception $ex) {
+        die(
+            '<div style="font-family:Arial;padding:30px">' .
+            '<h2>Database belum siap</h2>' .
+            '<p>Pastikan <b>MySQL</b> di XAMPP sudah Start.</p>' .
+            '<p>Jika MySQL memakai password root, ubah DB_PASS di bagian atas file.</p>' .
+            '<pre>' . e($ex->getMessage()) . '</pre>' .
+            '</div>'
+        );
+    }
+}
+
+function installDatabase() {
+    $pdo = db();
+
+    $tables = array();
+
+    $tables[] = "CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nama_lengkap VARCHAR(100) NOT NULL,
+        username VARCHAR(50) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        level ENUM('admin','petugas','owner') NOT NULL DEFAULT 'petugas',
+        foto VARCHAR(255) DEFAULT NULL,
+        status ENUM('Aktif','Nonaktif') NOT NULL DEFAULT 'Aktif',
+        email VARCHAR(100) DEFAULT NULL,
+        no_hp VARCHAR(30) DEFAULT NULL,
+        alamat TEXT DEFAULT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+    $tables[] = "CREATE TABLE IF NOT EXISTS tarif (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        jenis_kendaraan ENUM('Motor','Mobil','Bus/Truk') NOT NULL UNIQUE,
+        tarif_per_jam INT NOT NULL DEFAULT 0,
+        tarif_maksimal INT NOT NULL DEFAULT 0,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+    $tables[] = "CREATE TABLE IF NOT EXISTS area_parkir (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        kode_area VARCHAR(20) NOT NULL UNIQUE,
+        nama_area VARCHAR(100) NOT NULL,
+        jenis_kendaraan ENUM('Motor','Mobil','Bus/Truk','Semua') NOT NULL DEFAULT 'Semua',
+        kapasitas INT NOT NULL DEFAULT 0,
+        status ENUM('Aktif','Nonaktif') NOT NULL DEFAULT 'Aktif'
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+    $tables[] = "CREATE TABLE IF NOT EXISTS kendaraan (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nomor_polisi VARCHAR(20) NOT NULL UNIQUE,
+        jenis_kendaraan ENUM('Motor','Mobil','Bus/Truk') NOT NULL,
+        merk VARCHAR(50) DEFAULT NULL,
+        warna VARCHAR(30) DEFAULT NULL,
+        nama_pemilik VARCHAR(100) DEFAULT NULL,
+        no_hp VARCHAR(30) DEFAULT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+    $tables[] = "CREATE TABLE IF NOT EXISTS transaksi (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        kode_transaksi VARCHAR(40) NOT NULL UNIQUE,
+        nomor_polisi VARCHAR(20) NOT NULL,
+        jenis_kendaraan ENUM('Motor','Mobil','Bus/Truk') NOT NULL,
+        area_id INT DEFAULT NULL,
+        waktu_masuk DATETIME NOT NULL,
+        waktu_keluar DATETIME DEFAULT NULL,
+        durasi_jam DECIMAL(10,2) DEFAULT NULL,
+        tarif INT NOT NULL DEFAULT 0,
+        total_bayar INT NOT NULL DEFAULT 0,
+        status ENUM('Masuk','Keluar') NOT NULL DEFAULT 'Masuk',
+        petugas_masuk INT DEFAULT NULL,
+        petugas_keluar INT DEFAULT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        INDEX(status),
+        INDEX(waktu_masuk),
+        INDEX(waktu_keluar)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+    $tables[] = "CREATE TABLE IF NOT EXISTS login_log (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT DEFAULT NULL,
+        username VARCHAR(50) DEFAULT NULL,
+        aktivitas VARCHAR(100) NOT NULL,
+        keterangan VARCHAR(255) DEFAULT NULL,
+        ip_address VARCHAR(45) DEFAULT NULL,
+        waktu DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+    foreach ($tables as $sql) {
+        $pdo->exec($sql);
+    }
+
+    /* Kompatibilitas jika tabel lama belum memiliki kolom tertentu. */
+    try { $pdo->exec("ALTER TABLE users ADD COLUMN foto VARCHAR(255) DEFAULT NULL"); } catch (Exception $e) {}
+    try { $pdo->exec("ALTER TABLE users ADD COLUMN no_hp VARCHAR(30) DEFAULT NULL"); } catch (Exception $e) {}
+    try { $pdo->exec("ALTER TABLE users ADD COLUMN alamat TEXT DEFAULT NULL"); } catch (Exception $e) {}
+
+    /* Folder foto profil. */
+    $fotoDir = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'foto';
+    if (!is_dir($fotoDir)) {
+        @mkdir($fotoDir, 0755, true);
+    }
+
+    /* Tiga akun awal. Hanya dibuat jika username belum ada. */
+    $users = array(
+        array('Administrator', 'admin', 'admin123', 'admin', 'admin@parkir.local', 'ADMIN'),
+        array('Petugas Parkir', 'petugas', 'admin123', 'petugas', 'petugas@parkir.local', 'PETUGAS'),
+        array('Owner Parkir', 'owner', 'admin123', 'owner', 'owner@parkir.local', 'OWNER')
+    );
+
+    foreach ($users as $u) {
+        $check = $pdo->prepare("SELECT id, foto FROM users WHERE username=? LIMIT 1");
+        $check->execute(array($u[1]));
+        $old = $check->fetch();
+
+        if (!$old) {
+            $stmt = $pdo->prepare(
+                "INSERT INTO users(nama_lengkap,username,password,level,status,email,foto)
+                 VALUES(?,?,?,?,?,?,?)"
+            );
+            $stmt->execute(array(
+                $u[0], $u[1], password_hash($u[2], PASSWORD_DEFAULT),
+                $u[3], 'Aktif', $u[4], 'foto/' . strtolower($u[5]) . '.svg'
+            ));
+        }
+    }
+
+    /* Foto profil SVG otomatis untuk 3 user. Bisa diganti dengan foto JPG/PNG. */
+    $avatars = array(
+        'admin' => array('ADMIN', '#2563eb'),
+        'petugas' => array('PETUGAS', '#059669'),
+        'owner' => array('OWNER', '#7c3aed')
+    );
+
+    foreach ($avatars as $key => $av) {
+        $file = $fotoDir . DIRECTORY_SEPARATOR . $key . '.svg';
+        if (!file_exists($file)) {
+            $initial = strtoupper(substr($av[0], 0, 1));
+            $svg = '<?xml version="1.0" encoding="UTF-8"?>'
+                . '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">'
+                . '<rect width="300" height="300" rx="60" fill="' . $av[1] . '"/>'
+                . '<circle cx="150" cy="110" r="55" fill="#ffffff" opacity=".95"/>'
+                . '<path d="M65 265c8-55 43-82 85-82s77 27 85 82" fill="#ffffff" opacity=".95"/>'
+                . '<text x="150" y="290" text-anchor="middle" font-family="Arial" font-size="20" fill="#ffffff">'
+                . e($av[0]) . '</text></svg>';
+            @file_put_contents($file, $svg);
+        }
+    }
+
+    /* Data tarif awal. INSERT IGNORE mencegah Duplicate entry. */
+    $tarif = array(
+        array('Motor', 2000, 10000),
+        array('Mobil', 5000, 25000),
+        array('Bus/Truk', 10000, 50000)
+    );
+    $stmt = $pdo->prepare(
+        "INSERT IGNORE INTO tarif(jenis_kendaraan,tarif_per_jam,tarif_maksimal)
+         VALUES(?,?,?)"
+    );
+    foreach ($tarif as $t) {
+        $stmt->execute($t);
+    }
+
+    $count = (int)$pdo->query("SELECT COUNT(*) FROM area_parkir")->fetchColumn();
+    if ($count === 0) {
+        $stmt = $pdo->prepare(
+            "INSERT INTO area_parkir(kode_area,nama_area,jenis_kendaraan,kapasitas,status)
+             VALUES(?,?,?,?,?)"
+        );
+        $stmt->execute(array('A-M01', 'Area Motor 1', 'Motor', 50, 'Aktif'));
+        $stmt->execute(array('A-M02', 'Area Motor 2', 'Motor', 50, 'Aktif'));
+        $stmt->execute(array('B-C01', 'Area Mobil 1', 'Mobil', 30, 'Aktif'));
+        $stmt->execute(array('C-B01', 'Area Bus/Truk', 'Bus/Truk', 10, 'Aktif'));
+    }
+}
+
+installDatabase();
+
+function rupiah($n) {
+    return 'Rp ' . number_format((float)$n, 0, ',', '.');
+}
+
+function redirectTo($url) {
+    header('Location: ' . $url);
+    exit;
+}
+
+function flash($type, $message) {
+    $_SESSION['flash'] = array($type, $message);
+}
+
+function showFlash() {
+    if (!empty($_SESSION['flash'])) {
+        $f = $_SESSION['flash'];
+        unset($_SESSION['flash']);
+        echo '<div class="alert alert-' . e($f[0]) .
+             ' alert-dismissible fade show shadow-sm">' .
+             e($f[1]) .
+             '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+    }
+}
+
+function currentUser() {
+    return isset($_SESSION['user']) ? $_SESSION['user'] : null;
+}
+
+function requireLogin() {
+    if (!currentUser()) {
+        redirectTo('?page=login');
+    }
+}
+
+function can($levels) {
+    return currentUser() && in_array(currentUser()['level'], $levels, true);
+}
+
+function csrf() {
+    if (empty($_SESSION['csrf'])) {
+        $_SESSION['csrf'] = md5(uniqid(mt_rand(), true));
+    }
+    return $_SESSION['csrf'];
+}
+
+function checkCsrf() {
+    $a = isset($_SESSION['csrf']) ? $_SESSION['csrf'] : '';
+    $b = isset($_POST['csrf']) ? $_POST['csrf'] : '';
+    if (function_exists('hash_equals')) {
+        $ok = hash_equals($a, $b);
+    } else {
+        $ok = ($a === $b);
+    }
+    if (!$ok) {
+        die('CSRF token tidak valid. Silakan refresh halaman.');
+    }
+}
+
+function logActivity($activity, $description) {
+    $u = currentUser();
+    $stmt = db()->prepare(
+        "INSERT INTO login_log(user_id,username,aktivitas,keterangan,ip_address)
+         VALUES(?,?,?,?,?)"
+    );
+    $stmt->execute(array(
+        $u ? $u['id'] : null,
+        $u ? $u['username'] : 'guest',
+        $activity,
+        $description,
+        isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : ''
+    ));
+}
+
+function kodeTransaksi() {
+    return 'TRX-' . date('Ymd-His') . '-' . mt_rand(100, 999);
+}
+
+function durationHours($in, $out) {
+    $seconds = strtotime($out) - strtotime($in);
+    if ($seconds < 0) $seconds = 0;
+    return max(1, (int)ceil($seconds / 3600));
+}
+
+function calculateTariff($type, $hours) {
+    $stmt = db()->prepare(
+        "SELECT tarif_per_jam,tarif_maksimal FROM tarif
+         WHERE jenis_kendaraan=? LIMIT 1"
+    );
+    $stmt->execute(array($type));
+    $t = $stmt->fetch();
+    if (!$t) return 0;
+
+    $total = (int)$t['tarif_per_jam'] * (int)$hours;
+    if ((int)$t['tarif_maksimal'] > 0) {
+        $total = min($total, (int)$t['tarif_maksimal']);
+    }
+    return $total;
+}
+
+function activeParkedCount($type = null) {
+    if ($type !== null) {
+        $stmt = db()->prepare(
+            "SELECT COUNT(*) FROM transaksi WHERE status='Masuk' AND jenis_kendaraan=?"
+        );
+        $stmt->execute(array($type));
+        return (int)$stmt->fetchColumn();
+    }
+    return (int)db()->query(
+        "SELECT COUNT(*) FROM transaksi WHERE status='Masuk'"
+    )->fetchColumn();
+}
+
+function getPhoto($user) {
+    if (!empty($user['foto'])) {
+        return $user['foto'];
+    }
+    return 'foto/' . strtolower($user['level']) . '.svg';
+}
+
+function saveProfilePhoto($field, $oldPhoto, $username) {
+    if (!isset($_FILES[$field]) || $_FILES[$field]['error'] === UPLOAD_ERR_NO_FILE) {
+        return $oldPhoto;
+    }
+
+    if ($_FILES[$field]['error'] !== UPLOAD_ERR_OK) {
+        throw new Exception('Upload foto gagal.');
+    }
+
+    if ($_FILES[$field]['size'] > 2 * 1024 * 1024) {
+        throw new Exception('Ukuran foto maksimal 2 MB.');
+    }
+
+    $info = @getimagesize($_FILES[$field]['tmp_name']);
+    if (!$info) {
+        throw new Exception('File bukan gambar yang valid.');
+    }
+
+    $allowed = array('image/jpeg', 'image/png', 'image/webp');
+    if (!in_array($info['mime'], $allowed, true)) {
+        throw new Exception('Format foto harus JPG, PNG, atau WEBP.');
+    }
+
+    $ext = 'jpg';
+    if ($info['mime'] === 'image/png') $ext = 'png';
+    if ($info['mime'] === 'image/webp') $ext = 'webp';
+
+    $dir = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'foto';
+    if (!is_dir($dir)) @mkdir($dir, 0755, true);
+
+    $filename = preg_replace('/[^a-zA-Z0-9_-]/', '', $username) . '_' . time() . '.' . $ext;
+    $destination = $dir . DIRECTORY_SEPARATOR . $filename;
+
+    if (!move_uploaded_file($_FILES[$field]['tmp_name'], $destination)) {
+        throw new Exception('Foto tidak dapat disimpan. Pastikan folder foto bisa ditulis.');
+    }
+
+    if ($oldPhoto && strpos($oldPhoto, 'foto/admin.svg') === false &&
+        strpos($oldPhoto, 'foto/petugas.svg') === false &&
+        strpos($oldPhoto, 'foto/owner.svg') === false) {
+        $oldFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $oldPhoto);
+        if (is_file($oldFile)) @unlink($oldFile);
+    }
+
+    return 'foto/' . $filename;
+}
+
+$page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
+$action = isset($_POST['action']) ? $_POST['action'] : '';
+
+/* ========================= LOGIN ========================= */
+if ($page === 'login') {
+    if (currentUser()) redirectTo('?page=dashboard');
+
+    $error = '';
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'login') {
+        checkCsrf();
+
+        $username = trim(isset($_POST['username']) ? $_POST['username'] : '');
+        $password = isset($_POST['password']) ? $_POST['password'] : '';
+
+        $stmt = db()->prepare("SELECT * FROM users WHERE username=? LIMIT 1");
+        $stmt->execute(array($username));
+        $u = $stmt->fetch();
+
+        if ($u && $u['status'] === 'Aktif' && password_verify($password, $u['password'])) {
+            session_regenerate_id(true);
+
+            $_SESSION['user'] = array(
+                'id' => $u['id'],
+                'nama_lengkap' => $u['nama_lengkap'],
+                'username' => $u['username'],
+                'level' => $u['level'],
+                'foto' => $u['foto']
+            );
+
+            logActivity('Login', 'Login berhasil');
+            redirectTo('?page=dashboard');
+        }
+
+        $error = 'Username/password salah atau akun Nonaktif.';
+    }
+    ?>
+<!doctype html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bioskop Aldo - Pemesanan & Pemutaran Film</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, Helvetica, sans-serif;
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Login - ParkirPro</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+body{min-height:100vh;background:linear-gradient(135deg,#0f172a,#1d4ed8);font-family:Arial,sans-serif}
+.login-card{max-width:450px;border:0;border-radius:28px;box-shadow:0 30px 80px rgba(0,0,0,.30)}
+.login-logo{width:86px;height:86px;border-radius:25px;display:grid;place-items:center;background:#dbeafe;font-size:43px;margin:auto}
+.brand{font-weight:800;letter-spacing:-1px}
+.demo{background:#f8fafc;border-radius:14px;padding:12px}
+</style>
+</head>
+<body class="d-flex align-items-center">
+<div class="container py-5">
+<div class="card login-card mx-auto">
+<div class="card-body p-4 p-md-5">
+<div class="login-logo mb-3">🅿️</div>
+<h2 class="text-center brand">ParkirPro</h2>
+<p class="text-center text-secondary mb-4">Smart Parking Management System</p>
+<?php if ($error): ?><div class="alert alert-danger"><?=e($error)?></div><?php endif; ?>
+<form method="post">
+<input type="hidden" name="csrf" value="<?=e(csrf())?>">
+<input type="hidden" name="action" value="login">
+<label class="form-label">Username</label>
+<input class="form-control form-control-lg mb-3" name="username" required autofocus>
+<label class="form-label">Password</label>
+<input class="form-control form-control-lg mb-4" type="password" name="password" required>
+<button class="btn btn-primary btn-lg w-100">Masuk ke Sistem</button>
+</form>
+<div class="demo small text-secondary mt-4">
+<b>Akun demo</b><br>
+Admin: <b>admin</b> / <b>admin123</b><br>
+Petugas: <b>petugas</b> / <b>admin123</b><br>
+Owner: <b>owner</b> / <b>admin123</b>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
+<?php
+    exit;
+}
+
+/* ========================= LOGOUT ========================= */
+if ($page === 'logout') {
+    if (currentUser()) logActivity('Logout', 'Keluar dari sistem');
+    session_destroy();
+    redirectTo('?page=login');
+}
+
+requireLogin();
+
+/* ========================= EXPORT EXCEL MULTI-SHEET =========================
+   File Excel XML 2003: dapat dibuka di Microsoft Excel tanpa library tambahan.
+   Setiap kategori menjadi worksheet terpisah. Arsip mengambil seluruh data.
+*/
+if (isset($_GET['export']) && $_GET['export'] === 'excel') {
+    if (!can(array('admin','petugas','owner'))) {
+        http_response_code(403);
+        exit('Akses ditolak.');
+    }
+
+    $sheets = array();
+    $sheets['Kendaraan Masih Terparkir'] = array(
+        array('Kode Transaksi','Nomor Polisi','Jenis Kendaraan','Area','Waktu Masuk','Status'),
+    );
+    $rows = $pdo = db();
+    $data = $rows->query("SELECT t.kode_transaksi,t.nomor_polisi,t.jenis_kendaraan,COALESCE(a.nama_area,'-') nama_area,t.waktu_masuk,t.status FROM transaksi t LEFT JOIN area_parkir a ON a.id=t.area_id WHERE t.status='Masuk' ORDER BY t.waktu_masuk DESC")->fetchAll();
+    foreach ($data as $r) $sheets['Kendaraan Masih Terparkir'][] = array_values($r);
+
+    $sheets['Riwayat Keluar'] = array(
+        array('Kode Transaksi','Nomor Polisi','Jenis Kendaraan','Waktu Masuk','Waktu Keluar','Durasi Jam','Total Bayar','Status'),
+    );
+    $data = $rows->query("SELECT kode_transaksi,nomor_polisi,jenis_kendaraan,waktu_masuk,waktu_keluar,durasi_jam,total_bayar,status FROM transaksi WHERE status='Keluar' ORDER BY waktu_keluar DESC")->fetchAll();
+    foreach ($data as $r) $sheets['Riwayat Keluar'][] = array_values($r);
+
+    $sheets['Log Aktivitas'] = array(
+        array('Waktu','Username','Aktivitas','Keterangan','IP Address'),
+    );
+    $data = $rows->query("SELECT waktu,username,aktivitas,keterangan,ip_address FROM login_log ORDER BY waktu DESC")->fetchAll();
+    foreach ($data as $r) $sheets['Log Aktivitas'][] = array_values($r);
+
+    $sheets['Data Kendaraan'] = array(
+        array('Nomor Polisi','Jenis Kendaraan','Merk','Warna','Nama Pemilik','No. HP','Tanggal Terdaftar'),
+    );
+    $data = $rows->query("SELECT nomor_polisi,jenis_kendaraan,merk,warna,nama_pemilik,no_hp,created_at FROM kendaraan ORDER BY created_at DESC")->fetchAll();
+    foreach ($data as $r) $sheets['Data Kendaraan'][] = array_values($r);
+
+    function excelXmlCell($value) {
+        $value = (string)$value;
+        return '<Cell><Data ss:Type="String">' .
+            htmlspecialchars($value, ENT_QUOTES | ENT_XML1, 'UTF-8') .
+            '</Data></Cell>';
+    }
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>' .
+        '<?mso-application progid="Excel.Sheet"?>' .
+        '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ' .
+        'xmlns:o="urn:schemas-microsoft-com:office:office" ' .
+        'xmlns:x="urn:schemas-microsoft-com:office:excel" ' .
+        'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">';
+    foreach ($sheets as $sheetName => $sheetRows) {
+        $xml .= '<Worksheet ss:Name="' . htmlspecialchars($sheetName, ENT_QUOTES | ENT_XML1, 'UTF-8') . '"><Table>';
+        foreach ($sheetRows as $row) {
+            $xml .= '<Row>';
+            foreach ($row as $value) $xml .= excelXmlCell($value);
+            $xml .= '</Row>';
+        }
+        $xml .= '</Table></Worksheet>';
+    }
+    $xml .= '</Workbook>';
+    header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
+    header('Content-Disposition: attachment; filename="Arsip_ParkirPro_' . date('Y-m-d') . '.xls"');
+    header('Cache-Control: no-store, no-cache, must-revalidate');
+    echo $xml;
+    exit;
+}
+
+/* ========================= POST ACTION ========================= */
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    checkCsrf();
+
+    /* Ganti password */
+    if ($action === 'change_password') {
+        $old = isset($_POST['old_password']) ? $_POST['old_password'] : '';
+        $new = isset($_POST['new_password']) ? $_POST['new_password'] : '';
+        $confirm = isset($_POST['confirm_password']) ? $_POST['confirm_password'] : '';
+
+        $stmt = db()->prepare("SELECT password FROM users WHERE id=?");
+        $stmt->execute(array(currentUser()['id']));
+        $u = $stmt->fetch();
+
+        if (!$u || !password_verify($old, $u['password'])) {
+            flash('danger', 'Password lama salah.');
+        } elseif (strlen($new) < 6) {
+            flash('danger', 'Password baru minimal 6 karakter.');
+        } elseif ($new !== $confirm) {
+            flash('danger', 'Konfirmasi password tidak sama.');
+        } else {
+            $stmt = db()->prepare("UPDATE users SET password=? WHERE id=?");
+            $stmt->execute(array(password_hash($new, PASSWORD_DEFAULT), currentUser()['id']));
+            flash('success', 'Password berhasil diubah.');
+            logActivity('Ganti Password', 'Password akun diubah');
+        }
+        redirectTo('?page=profile');
+    }
+
+    /* Update profil + foto */
+    if ($action === 'save_profile') {
+        $nama = trim(isset($_POST['nama_lengkap']) ? $_POST['nama_lengkap'] : '');
+        $email = trim(isset($_POST['email']) ? $_POST['email'] : '');
+        $hp = trim(isset($_POST['no_hp']) ? $_POST['no_hp'] : '');
+        $alamat = trim(isset($_POST['alamat']) ? $_POST['alamat'] : '');
+
+        if (!$nama) {
+            flash('danger', 'Nama lengkap wajib diisi.');
+            redirectTo('?page=profile');
         }
 
-        body {
-            background-color: #eef1f5;
-            color: #000000;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+        try {
+            $stmt = db()->prepare("SELECT foto FROM users WHERE id=?");
+            $stmt->execute(array(currentUser()['id']));
+            $old = $stmt->fetch();
+            $foto = $old ? $old['foto'] : null;
+
+            $foto = saveProfilePhoto('foto', $foto, currentUser()['username']);
+
+            $stmt = db()->prepare(
+                "UPDATE users SET nama_lengkap=?,email=?,no_hp=?,alamat=?,foto=? WHERE id=?"
+            );
+            $stmt->execute(array($nama, $email, $hp, $alamat, $foto, currentUser()['id']));
+
+            $_SESSION['user']['nama_lengkap'] = $nama;
+            $_SESSION['user']['foto'] = $foto;
+
+            flash('success', 'Profil dan foto profil berhasil diperbarui.');
+        } catch (Exception $ex) {
+            flash('danger', $ex->getMessage());
         }
 
-        .hidden {
-            display: none !important;
+        redirectTo('?page=profile');
+    }
+
+    /* Parkir masuk */
+    if ($action === 'parkir_masuk') {
+        if (!can(array('admin','petugas'))) {
+            flash('danger', 'Anda tidak memiliki akses.');
+            redirectTo('?page=dashboard');
         }
 
-        /* =========================================
-           1. HALAMAN LOGIN (SESUAI NETBEANS)
-           ========================================= */
-        .login-box {
-            background: #ffffff;
-            width: 100%;
-            max-width: 450px;
-            border-radius: 8px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-            overflow: hidden;
-            border: 1px solid #d0d7de;
+        $plate = strtoupper(trim(isset($_POST['nomor_polisi']) ? $_POST['nomor_polisi'] : ''));
+        $type = isset($_POST['jenis_kendaraan']) ? $_POST['jenis_kendaraan'] : '';
+        $area = (int)(isset($_POST['area_id']) ? $_POST['area_id'] : 0);
+        $owner = trim(isset($_POST['nama_pemilik']) ? $_POST['nama_pemilik'] : '');
+
+        $validTypes = array('Motor','Mobil','Bus/Truk');
+
+        if (!$plate || !in_array($type, $validTypes, true) || !$area) {
+            flash('danger', 'Nomor polisi, jenis kendaraan, dan area wajib diisi.');
+            redirectTo('?page=transaksi&aksi=masuk');
         }
 
-        .login-body {
-            padding: 35px 45px 25px 45px;
+        $stmt = db()->prepare(
+            "SELECT COUNT(*) FROM transaksi WHERE nomor_polisi=? AND status='Masuk'"
+        );
+        $stmt->execute(array($plate));
+
+        if ((int)$stmt->fetchColumn() > 0) {
+            flash('warning', 'Kendaraan tersebut masih tercatat berada di area parkir.');
+            redirectTo('?page=transaksi&aksi=masuk');
         }
 
-        .login-title {
-            text-align: center;
-            font-size: 26px;
-            font-weight: bold;
-            color: #000000;
-            margin-bottom: 25px;
+        $stmt = db()->prepare(
+            "SELECT * FROM area_parkir WHERE id=? AND status='Aktif' LIMIT 1"
+        );
+        $stmt->execute(array($area));
+        $ar = $stmt->fetch();
+
+        if (!$ar) {
+            flash('danger', 'Area parkir tidak tersedia.');
+            redirectTo('?page=transaksi&aksi=masuk');
         }
 
-        .form-group {
-            margin-bottom: 18px;
+        if ($ar['jenis_kendaraan'] !== 'Semua' && $ar['jenis_kendaraan'] !== $type) {
+            flash('danger', 'Jenis kendaraan tidak sesuai dengan area.');
+            redirectTo('?page=transaksi&aksi=masuk');
         }
 
-        .form-group label {
-            display: block;
-            font-size: 14px;
-            font-weight: bold;
-            color: #000000;
-            margin-bottom: 6px;
+        $stmt = db()->prepare(
+            "SELECT COUNT(*) FROM transaksi WHERE area_id=? AND status='Masuk'"
+        );
+        $stmt->execute(array($area));
+
+        if ((int)$stmt->fetchColumn() >= (int)$ar['kapasitas']) {
+            flash('danger', 'Kapasitas area parkir penuh.');
+            redirectTo('?page=transaksi&aksi=masuk');
         }
 
-        .form-group input {
-            width: 100%;
-            padding: 10px 12px;
-            font-size: 14px;
-            font-weight: bold;
-            color: #000000;
-            border: 1px solid #999999;
-            border-radius: 4px;
-            background: #ffffff;
+        /* Simpan kendaraan tanpa membuat duplicate key. */
+        $stmt = db()->prepare(
+            "SELECT id FROM kendaraan WHERE nomor_polisi=? LIMIT 1"
+        );
+        $stmt->execute(array($plate));
+        $existingCar = $stmt->fetch();
+
+        if ($existingCar) {
+            $stmt = db()->prepare(
+                "UPDATE kendaraan SET jenis_kendaraan=?,nama_pemilik=? WHERE id=?"
+            );
+            $stmt->execute(array($type, $owner, $existingCar['id']));
+        } else {
+            $stmt = db()->prepare(
+                "INSERT INTO kendaraan(nomor_polisi,jenis_kendaraan,nama_pemilik)
+                 VALUES(?,?,?)"
+            );
+            $stmt->execute(array($plate, $type, $owner));
         }
 
-        .form-group input:focus {
-            outline: none;
-            border-color: #1e90ff;
-            box-shadow: 0 0 0 2px rgba(30, 144, 255, 0.2);
+        $kode = kodeTransaksi();
+
+        $stmt = db()->prepare(
+            "INSERT INTO transaksi
+             (kode_transaksi,nomor_polisi,jenis_kendaraan,area_id,waktu_masuk,petugas_masuk,status)
+             VALUES(?,?,?,?,NOW(),?,'Masuk')"
+        );
+        $stmt->execute(array($kode, $plate, $type, $area, currentUser()['id']));
+
+        logActivity('Parkir Masuk', $kode . ' - ' . $plate);
+        flash('success', 'Parkir masuk berhasil. Kode: ' . $kode);
+        redirectTo('?page=transaksi');
+    }
+
+    /* Parkir keluar */
+    if ($action === 'parkir_keluar') {
+        if (!can(array('admin','petugas'))) {
+            flash('danger', 'Anda tidak memiliki akses.');
+            redirectTo('?page=dashboard');
         }
 
-        .btn-login {
-            width: 100%;
-            padding: 14px;
-            background-color: #1e90ff; /* Dodger Blue */
-            color: #ffffff;
-            font-size: 16px;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-            transition: background 0.2s;
+        $id = (int)(isset($_POST['transaksi_id']) ? $_POST['transaksi_id'] : 0);
+
+        $stmt = db()->prepare(
+            "SELECT * FROM transaksi WHERE id=? AND status='Masuk' LIMIT 1"
+        );
+        $stmt->execute(array($id));
+        $t = $stmt->fetch();
+
+        if (!$t) {
+            flash('danger', 'Transaksi aktif tidak ditemukan.');
+            redirectTo('?page=transaksi');
         }
 
-        .btn-login:hover {
-            background-color: #187bcd;
+        $out = date('Y-m-d H:i:s');
+        $hours = durationHours($t['waktu_masuk'], $out);
+        $total = calculateTariff($t['jenis_kendaraan'], $hours);
+        $tarifPerJam = calculateTariff($t['jenis_kendaraan'], 1);
+
+        $stmt = db()->prepare(
+            "UPDATE transaksi
+             SET waktu_keluar=?,durasi_jam=?,tarif=?,total_bayar=?,
+                 status='Keluar',petugas_keluar=?
+             WHERE id=?"
+        );
+        $stmt->execute(array(
+            $out, $hours, $tarifPerJam, $total, currentUser()['id'], $id
+        ));
+
+        logActivity(
+            'Parkir Keluar',
+            $t['kode_transaksi'] . ' - ' . $t['nomor_polisi'] . ' - ' . rupiah($total)
+        );
+
+        flash('success', 'Kendaraan keluar. Total bayar: ' . rupiah($total));
+        redirectTo('?page=struk&id=' . $id);
+    }
+
+    /* User: tambah/edit */
+    if ($action === 'save_user' && can(array('admin'))) {
+        $id = (int)(isset($_POST['id']) ? $_POST['id'] : 0);
+        $nama = trim(isset($_POST['nama_lengkap']) ? $_POST['nama_lengkap'] : '');
+        $username = trim(isset($_POST['username']) ? $_POST['username'] : '');
+        $level = isset($_POST['level']) ? $_POST['level'] : 'petugas';
+        $status = isset($_POST['status']) ? $_POST['status'] : 'Aktif';
+        $email = trim(isset($_POST['email']) ? $_POST['email'] : '');
+        $hp = trim(isset($_POST['no_hp']) ? $_POST['no_hp'] : '');
+        $alamat = trim(isset($_POST['alamat']) ? $_POST['alamat'] : '');
+        $pass = isset($_POST['password']) ? $_POST['password'] : '';
+
+        $validLevels = array('admin','petugas','owner');
+        $validStatus = array('Aktif','Nonaktif');
+
+        if (!$nama || !$username ||
+            !in_array($level, $validLevels, true) ||
+            !in_array($status, $validStatus, true)) {
+            flash('danger', 'Data user tidak lengkap.');
+            redirectTo('?page=users');
         }
 
-        /* =========================================
-           2. HALAMAN UTAMA (PILIH FILM)
-           ========================================= */
-        .main-container {
-            background: #f5f5f5;
-            width: 100%;
-            max-width: 960px;
-            border-radius: 8px;
-            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
-            overflow: hidden;
-            border: 1px solid #cccccc;
-        }
-
-        .main-header {
-            background-color: #2c3e50;
-            color: #ffffff;
-            text-align: center;
-            padding: 20px 15px;
-        }
-
-        .main-header h1 {
-            font-size: 28px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            margin-bottom: 6px;
-        }
-
-        .main-header p {
-            font-size: 14px;
-            color: #d3d3d3;
-        }
-
-        .film-list {
-            padding: 15px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .film-card {
-            background: #ffffff;
-            border: 1px solid #cccccc;
-            border-radius: 4px;
-            padding: 14px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-        }
-
-        .film-poster {
-            width: 105px;
-            height: 145px;
-            object-fit: cover;
-            background-color: #333333;
-            border-radius: 4px;
-            flex-shrink: 0;
-            border: 1px solid #bbbbbb;
-        }
-
-        .film-info {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .film-info h2 {
-            font-size: 19px;
-            font-weight: bold;
-            color: #000000;
-        }
-
-        .film-info .meta {
-            font-size: 13px;
-            color: #333333;
-        }
-
-        .film-info .price {
-            font-size: 15px;
-            font-weight: bold;
-            color: #27ae60;
-        }
-
-        .film-order {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .film-order label {
-            font-size: 14px;
-            color: #000000;
-        }
-
-        .qty-control {
-            display: flex;
-            align-items: center;
-            border: 1px solid #999999;
-            border-radius: 4px;
-            overflow: hidden;
-            background: #ffffff;
-        }
-
-        .qty-control button {
-            width: 28px;
-            height: 30px;
-            border: none;
-            background: #e9ecef;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 15px;
-        }
-
-        .qty-control button:hover {
-            background: #d6d8db;
-        }
-
-        .qty-control input {
-            width: 40px;
-            height: 30px;
-            text-align: center;
-            border: none;
-            font-weight: bold;
-            font-size: 14px;
-            color: #000000;
-        }
-
-        .main-footer {
-            background: #ffffff;
-            padding: 15px 20px;
-            border-top: 1px solid #dddddd;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .btn-action {
-            padding: 10px 18px;
-            font-size: 13px;
-            font-weight: bold;
-            border: 1px solid #b0b0b0;
-            border-radius: 4px;
-            background: #f0f0f0;
-            color: #000000;
-            cursor: pointer;
-        }
-
-        .btn-action:hover {
-            background: #e0e0e0;
-        }
-
-        .btn-pay-next {
-            background-color: #2ecc71;
-            color: #ffffff;
-            border: none;
-            font-size: 14px;
-            padding: 10px 22px;
-        }
-
-        .btn-pay-next:hover {
-            background-color: #27ae60;
-        }
-
-        /* =========================================
-           3. HALAMAN PEMBAYARAN
-           ========================================= */
-        .payment-box {
-            background: #ffffff;
-            width: 100%;
-            max-width: 520px;
-            border-radius: 8px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-            padding: 25px 30px;
-            border: 1px solid #cccccc;
-        }
-
-        .payment-title {
-            text-align: center;
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 18px;
-            color: #000000;
-        }
-
-        .receipt-area {
-            width: 100%;
-            background: #f8f9fa;
-            border: 1px solid #cccccc;
-            border-radius: 4px;
-            padding: 12px;
-            font-family: "Courier New", Courier, monospace;
-            font-size: 13px;
-            line-height: 1.6;
-            margin-bottom: 15px;
-            white-space: pre-line;
-        }
-
-        .total-label {
-            text-align: center;
-            font-size: 21px;
-            font-weight: bold;
-            color: #e74c3c;
-            margin-bottom: 18px;
-        }
-
-        .payment-method {
-            margin-bottom: 20px;
-        }
-
-        .payment-method label {
-            display: block;
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 6px;
-        }
-
-        .payment-method select {
-            width: 100%;
-            padding: 10px;
-            font-size: 14px;
-            font-weight: bold;
-            border: 1px solid #999999;
-            border-radius: 4px;
-        }
-
-        .payment-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .btn-confirm {
-            background-color: #2980b9;
-            color: #ffffff;
-            border: none;
-            padding: 12px;
-            font-size: 15px;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .btn-confirm:hover {
-            background-color: #1f6391;
-        }
-
-        /* =========================================
-           4. HALAMAN PEMUTARAN FILM (THEATER SLIDE)
-           ========================================= */
-        .theater-box {
-            background: #000000;
-            color: #ffffff;
-            width: 100%;
-            max-width: 900px;
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            overflow: hidden;
-            border: 2px solid #2c3e50;
-        }
-
-        .theater-header {
-            background: #141414;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            border-bottom: 1px solid #333333;
-        }
-
-        .slide-badge {
-            background: #e50914;
-            color: #ffffff;
-            padding: 5px 12px;
-            border-radius: 4px;
-            font-size: 13px;
-            font-weight: bold;
-        }
-
-        .now-playing-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #ffffff;
-        }
-
-        .video-wrapper {
-            position: relative;
-            width: 100%;
-            padding-top: 56.25%; /* Rasio 16:9 */
-            background: #000000;
-        }
-
-        .video-wrapper iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        .theater-controls {
-            background: #141414;
-            padding: 16px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .direct-yt-link {
-            color: #63b3ed;
-            font-size: 13px;
-            text-decoration: none;
-        }
-
-        .direct-yt-link:hover {
-            text-decoration: underline;
-        }
-
-        .btn-next-slide {
-            background-color: #e50914;
-            color: #ffffff;
-            border: none;
-            padding: 12px 24px;
-            font-size: 15px;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .btn-next-slide:hover {
-            background-color: #b80710;
-        }
-
-        .thank-you-screen {
-            padding: 90px 20px;
-            text-align: center;
-            background: #000000;
-        }
-
-        .thank-you-screen h2 {
-            font-size: 30px;
-            font-weight: bold;
-            color: #ffffff;
-            margin-bottom: 16px;
-            line-height: 1.4;
-        }
-
-        .thank-you-screen p {
-            color: #aaaaaa;
-            font-size: 15px;
-        }
-
-        @media (max-width: 640px) {
-            .film-card {
-                flex-direction: column;
-                align-items: flex-start;
+        try {
+            /* Cek username agar tidak muncul Duplicate entry. */
+            $stmt = db()->prepare(
+                "SELECT id FROM users WHERE username=? AND id<>? LIMIT 1"
+            );
+            $stmt->execute(array($username, $id));
+            if ($stmt->fetch()) {
+                flash('danger', 'Username "' . $username . '" sudah digunakan.');
+                redirectTo('?page=users');
             }
-            .film-poster {
-                width: 100%;
-                height: 180px;
+
+            if ($id) {
+                if ($pass !== '') {
+                    $stmt = db()->prepare(
+                        "UPDATE users
+                         SET nama_lengkap=?,username=?,level=?,status=?,email=?,no_hp=?,alamat=?,password=?
+                         WHERE id=?"
+                    );
+                    $stmt->execute(array(
+                        $nama,$username,$level,$status,$email,$hp,$alamat,
+                        password_hash($pass, PASSWORD_DEFAULT),$id
+                    ));
+                } else {
+                    $stmt = db()->prepare(
+                        "UPDATE users
+                         SET nama_lengkap=?,username=?,level=?,status=?,email=?,no_hp=?,alamat=?
+                         WHERE id=?"
+                    );
+                    $stmt->execute(array(
+                        $nama,$username,$level,$status,$email,$hp,$alamat,$id
+                    ));
+                }
+                flash('success', 'User berhasil diperbarui.');
+            } else {
+                if ($pass === '') $pass = 'admin123';
+
+                $stmt = db()->prepare(
+                    "INSERT INTO users
+                     (nama_lengkap,username,password,level,status,email,no_hp,alamat,foto)
+                     VALUES(?,?,?,?,?,?,?,?,?)"
+                );
+                $stmt->execute(array(
+                    $nama,$username,password_hash($pass, PASSWORD_DEFAULT),
+                    $level,$status,$email,$hp,$alamat,
+                    'foto/' . $level . '.svg'
+                ));
+                flash('success', 'User berhasil ditambahkan.');
+            }
+        } catch (Exception $ex) {
+            flash('danger', 'Gagal menyimpan user: ' . $ex->getMessage());
+        }
+
+        redirectTo('?page=users');
+    }
+
+    /* User: hapus */
+    if ($action === 'delete_user' && can(array('admin'))) {
+        $id = (int)(isset($_POST['id']) ? $_POST['id'] : 0);
+
+        if ($id === (int)currentUser()['id']) {
+            flash('warning', 'Akun yang sedang digunakan tidak dapat dihapus.');
+        } else {
+            db()->prepare("DELETE FROM users WHERE id=?")->execute(array($id));
+            flash('success', 'User berhasil dihapus.');
+        }
+
+        redirectTo('?page=users');
+    }
+
+    /* Tarif: simpan dengan pengecekan duplicate jenis kendaraan. */
+    if ($action === 'save_tarif' && can(array('admin'))) {
+        $id = (int)(isset($_POST['id']) ? $_POST['id'] : 0);
+        $type = isset($_POST['jenis_kendaraan']) ? $_POST['jenis_kendaraan'] : '';
+        $per = (int)(isset($_POST['tarif_per_jam']) ? $_POST['tarif_per_jam'] : 0);
+        $max = (int)(isset($_POST['tarif_maksimal']) ? $_POST['tarif_maksimal'] : 0);
+
+        if (!in_array($type, array('Motor','Mobil','Bus/Truk'), true)) {
+            flash('danger', 'Jenis kendaraan tidak valid.');
+            redirectTo('?page=tarif');
+        }
+
+        $stmt = db()->prepare(
+            "SELECT id FROM tarif WHERE jenis_kendaraan=? AND id<>? LIMIT 1"
+        );
+        $stmt->execute(array($type, $id));
+
+        if ($stmt->fetch()) {
+            flash('danger', 'Tarif untuk jenis "' . $type . '" sudah ada. Pilih jenis lain.');
+        } else {
+            try {
+                if ($id) {
+                    $stmt = db()->prepare(
+                        "UPDATE tarif SET jenis_kendaraan=?,tarif_per_jam=?,tarif_maksimal=?
+                         WHERE id=?"
+                    );
+                    $stmt->execute(array($type,$per,$max,$id));
+                } else {
+                    $stmt = db()->prepare(
+                        "INSERT INTO tarif(jenis_kendaraan,tarif_per_jam,tarif_maksimal)
+                         VALUES(?,?,?)"
+                    );
+                    $stmt->execute(array($type,$per,$max));
+                }
+                flash('success', 'Tarif berhasil disimpan.');
+            } catch (Exception $ex) {
+                flash('danger', 'Gagal menyimpan tarif: ' . $ex->getMessage());
             }
         }
-    </style>
+        redirectTo('?page=tarif');
+    }
+
+    /* Area: simpan */
+    if ($action === 'save_area' && can(array('admin'))) {
+        $id = (int)(isset($_POST['id']) ? $_POST['id'] : 0);
+        $kode = strtoupper(trim(isset($_POST['kode_area']) ? $_POST['kode_area'] : ''));
+        $nama = trim(isset($_POST['nama_area']) ? $_POST['nama_area'] : '');
+        $type = isset($_POST['jenis_kendaraan']) ? $_POST['jenis_kendaraan'] : 'Semua';
+        $kap = (int)(isset($_POST['kapasitas']) ? $_POST['kapasitas'] : 0);
+        $status = isset($_POST['status']) ? $_POST['status'] : 'Aktif';
+
+        if (!$kode || !$nama || $kap < 1 ||
+            !in_array($type,array('Motor','Mobil','Bus/Truk','Semua'),true)) {
+            flash('danger', 'Data area belum lengkap.');
+            redirectTo('?page=area');
+        }
+
+        try {
+            $stmt = db()->prepare(
+                "SELECT id FROM area_parkir WHERE kode_area=? AND id<>? LIMIT 1"
+            );
+            $stmt->execute(array($kode,$id));
+            if ($stmt->fetch()) {
+                flash('danger', 'Kode area sudah digunakan.');
+            } elseif ($id) {
+                $stmt = db()->prepare(
+                    "UPDATE area_parkir
+                     SET kode_area=?,nama_area=?,jenis_kendaraan=?,kapasitas=?,status=?
+                     WHERE id=?"
+                );
+                $stmt->execute(array($kode,$nama,$type,$kap,$status,$id));
+                flash('success', 'Area parkir diperbarui.');
+            } else {
+                $stmt = db()->prepare(
+                    "INSERT INTO area_parkir
+                     (kode_area,nama_area,jenis_kendaraan,kapasitas,status)
+                     VALUES(?,?,?,?,?)"
+                );
+                $stmt->execute(array($kode,$nama,$type,$kap,$status));
+                flash('success', 'Area parkir ditambahkan.');
+            }
+        } catch (Exception $ex) {
+            flash('danger', 'Gagal menyimpan area: ' . $ex->getMessage());
+        }
+
+        redirectTo('?page=area');
+    }
+
+    /* Area: hapus */
+    if ($action === 'delete_area' && can(array('admin'))) {
+        $id = (int)(isset($_POST['id']) ? $_POST['id'] : 0);
+        $stmt = db()->prepare(
+            "SELECT COUNT(*) FROM transaksi WHERE area_id=? AND status='Masuk'"
+        );
+        $stmt->execute(array($id));
+
+        if ((int)$stmt->fetchColumn() > 0) {
+            flash('danger', 'Area tidak dapat dihapus karena masih digunakan kendaraan.');
+        } else {
+            db()->prepare("DELETE FROM area_parkir WHERE id=?")->execute(array($id));
+            flash('success', 'Area parkir berhasil dihapus.');
+        }
+        redirectTo('?page=area');
+    }
+
+    /* Kendaraan: simpan */
+    if ($action === 'save_kendaraan' && can(array('admin','petugas'))) {
+        $id = (int)(isset($_POST['id']) ? $_POST['id'] : 0);
+        $plate = strtoupper(trim(isset($_POST['nomor_polisi']) ? $_POST['nomor_polisi'] : ''));
+        $type = isset($_POST['jenis_kendaraan']) ? $_POST['jenis_kendaraan'] : '';
+        $merk = trim(isset($_POST['merk']) ? $_POST['merk'] : '');
+        $warna = trim(isset($_POST['warna']) ? $_POST['warna'] : '');
+        $owner = trim(isset($_POST['nama_pemilik']) ? $_POST['nama_pemilik'] : '');
+        $hp = trim(isset($_POST['no_hp']) ? $_POST['no_hp'] : '');
+
+        if (!$plate || !in_array($type,array('Motor','Mobil','Bus/Truk'),true)) {
+            flash('danger', 'Nomor polisi dan jenis kendaraan wajib diisi.');
+            redirectTo('?page=kendaraan');
+        }
+
+        try {
+            $stmt = db()->prepare(
+                "SELECT id FROM kendaraan WHERE nomor_polisi=? AND id<>? LIMIT 1"
+            );
+            $stmt->execute(array($plate,$id));
+
+            if ($stmt->fetch()) {
+                flash('danger', 'Nomor polisi sudah terdaftar.');
+            } elseif ($id) {
+                $stmt = db()->prepare(
+                    "UPDATE kendaraan
+                     SET nomor_polisi=?,jenis_kendaraan=?,merk=?,warna=?,nama_pemilik=?,no_hp=?
+                     WHERE id=?"
+                );
+                $stmt->execute(array($plate,$type,$merk,$warna,$owner,$hp,$id));
+                flash('success', 'Data kendaraan diperbarui.');
+            } else {
+                $stmt = db()->prepare(
+                    "INSERT INTO kendaraan
+                     (nomor_polisi,jenis_kendaraan,merk,warna,nama_pemilik,no_hp)
+                     VALUES(?,?,?,?,?,?)"
+                );
+                $stmt->execute(array($plate,$type,$merk,$warna,$owner,$hp));
+                flash('success', 'Data kendaraan ditambahkan.');
+            }
+        } catch (Exception $ex) {
+            flash('danger', 'Gagal menyimpan kendaraan: ' . $ex->getMessage());
+        }
+
+        redirectTo('?page=kendaraan');
+    }
+
+    /* Kendaraan: hapus */
+    if ($action === 'delete_kendaraan' && can(array('admin'))) {
+        $id = (int)(isset($_POST['id']) ? $_POST['id'] : 0);
+        db()->prepare("DELETE FROM kendaraan WHERE id=?")->execute(array($id));
+        flash('success', 'Data kendaraan berhasil dihapus.');
+        redirectTo('?page=kendaraan');
+    }
+}
+
+/* ========================= DATA DASHBOARD ========================= */
+$pdo = db();
+
+$today = date('Y-m-d');
+$month = date('Y-m');
+
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM transaksi WHERE DATE(waktu_masuk)=?");
+$stmt->execute(array($today));
+$masukHari = (int)$stmt->fetchColumn();
+
+$stmt = $pdo->prepare(
+    "SELECT COUNT(*) FROM transaksi WHERE status='Keluar' AND DATE(waktu_keluar)=?"
+);
+$stmt->execute(array($today));
+$keluarHari = (int)$stmt->fetchColumn();
+
+$stmt = $pdo->prepare(
+    "SELECT COALESCE(SUM(total_bayar),0) FROM transaksi
+     WHERE status='Keluar' AND DATE(waktu_keluar)=?"
+);
+$stmt->execute(array($today));
+$pendapatanHari = (int)$stmt->fetchColumn();
+
+$stmt = $pdo->prepare(
+    "SELECT COALESCE(SUM(total_bayar),0) FROM transaksi
+     WHERE status='Keluar' AND DATE_FORMAT(waktu_keluar,'%Y-%m')=?"
+);
+$stmt->execute(array($month));
+$pendapatanBulan = (int)$stmt->fetchColumn();
+
+$terparkir = activeParkedCount();
+
+$totalKapasitas = (int)$pdo->query(
+    "SELECT COALESCE(SUM(kapasitas),0) FROM area_parkir WHERE status='Aktif'"
+)->fetchColumn();
+
+$tersedia = max(0, $totalKapasitas - $terparkir);
+
+$jenisCounts = array();
+foreach (array('Motor','Mobil','Bus/Truk') as $j) {
+    $jenisCounts[$j] = activeParkedCount($j);
+}
+
+$recent = $pdo->query(
+    "SELECT t.*,a.nama_area FROM transaksi t
+     LEFT JOIN area_parkir a ON a.id=t.area_id
+     WHERE DATE(t.waktu_masuk)=CURDATE() OR DATE(t.waktu_keluar)=CURDATE()
+     ORDER BY t.id DESC LIMIT 8"
+)->fetchAll();
+
+$daily = array();
+for ($i=6; $i>=0; $i--) {
+    $d = date('Y-m-d', strtotime('-' . $i . ' days'));
+    $stmt = $pdo->prepare(
+        "SELECT COALESCE(SUM(total_bayar),0) FROM transaksi
+         WHERE status='Keluar' AND DATE(waktu_keluar)=?"
+    );
+    $stmt->execute(array($d));
+    $daily[] = array('date'=>$d, 'total'=>(int)$stmt->fetchColumn());
+}
+
+function pageTitle($page) {
+    switch ($page) {
+        case 'dashboard': return 'Dashboard';
+        case 'users': return 'Manajemen User';
+        case 'tarif': return 'Tarif Parkir';
+        case 'area': return 'Area Parkir';
+        case 'kendaraan': return 'Data Kendaraan';
+        case 'transaksi': return 'Transaksi Parkir';
+        case 'laporan': return 'Laporan';
+        case 'log': return 'Log Aktivitas';
+        case 'profile': return 'Profil Saya';
+        case 'struk': return 'Struk Parkir';
+        default: return 'ParkirPro';
+    }
+}
+?>
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title><?=e(pageTitle($page))?> - ParkirPro</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+:root{--sidebar:#0f172a;--primary:#2563eb;--bg:#f5f7fb}
+body{background:var(--bg);font-family:Arial,sans-serif;color:#172033}
+.sidebar{width:260px;background:var(--sidebar);min-height:100vh;position:fixed;left:0;top:0;z-index:1000;color:#fff}
+.brand-box{padding:22px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand{font-size:23px;font-weight:800}.brand small{font-size:10px;display:block;color:#94a3b8;letter-spacing:1.2px}
+.nav-link{color:#aab5c8;border-radius:12px;margin:3px 12px;padding:11px 14px}
+.nav-link:hover,.nav-link.active{color:#fff;background:#2563eb}
+.nav-link i{width:24px}.main{margin-left:260px;min-height:100vh}
+.topbar{height:72px;background:#fff;border-bottom:1px solid #e7eaf0;padding:0 28px;display:flex;align-items:center;justify-content:space-between}
+.content{padding:28px}.card{border:0;border-radius:18px;box-shadow:0 4px 20px rgba(17,24,39,.06)}
+.stat{padding:22px}.stat-icon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:#eff6ff;color:#2563eb;font-size:22px}
+.table{vertical-align:middle}.table thead th{font-size:12px;text-transform:uppercase;color:#64748b;background:#f8fafc;border-bottom:0}
+.badge-soft{background:#eef2ff;color:#3730a3}.avatar{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.profile-big{width:120px;height:120px;border-radius:28px;object-fit:cover}
+.progress{height:8px;border-radius:99px}.chartbar{height:180px;display:flex;align-items:end;gap:10px}
+.bar{flex:1;background:#2563eb;border-radius:8px 8px 3px 3px;min-height:3px}
+.chartlabel{font-size:10px;color:#64748b;text-align:center;margin-top:6px}
+.quick{border-radius:15px;background:#f8fafc;padding:15px}
+@media(max-width:900px){
+.sidebar{width:76px}.brand-box .brand,.sidebar .nav-link span,.user-side{display:none}
+.nav-link{margin:4px 8px;text-align:center}.main{margin-left:76px}.content{padding:18px}
+}
+@media print{
+.sidebar,.topbar,.no-print{display:none!important}.main{margin:0}.content{padding:0}.card{box-shadow:none}
+}
+</style>
 </head>
 <body>
 
-    <!-- ==========================================
-         1. HALAMAN LOGIN CUSTOMER
-         ========================================== -->
-    <div id="loginSection" class="login-box">
-        <div class="login-body">
-            <div class="login-title">LOGIN BIOSKOP ALDO</div>
-            <div class="form-group">
-                <label for="txtUser">Username (aldo):</label>
-                <input type="text" id="txtUser" placeholder="Masukkan username">
-            </div>
-            <div class="form-group">
-                <label for="txtPass">Password (aldo123):</label>
-                <input type="password" id="txtPass" placeholder="Masukkan password">
-            </div>
-        </div>
-        <button class="btn-login" onclick="prosesLogin()">MASUK</button>
-    </div>
+<aside class="sidebar">
+<div class="brand-box">
+<div class="brand">🅿️ ParkirPro <small>SMART PARKING SYSTEM</small></div>
+</div>
 
-    <!-- ==========================================
-         2. HALAMAN UTAMA (MENU PILIH FILM)
-         ========================================== -->
-    <div id="mainSection" class="main-container hidden">
-        <div class="main-header">
-            <h1>BIOSKOP ALDO</h1>
-            <p id="headerDate">Tanggal Hari Ini: -</p>
-        </div>
+<div class="py-3">
+<div class="px-3 text-uppercase small text-secondary mb-2">Menu Utama</div>
 
-        <div id="filmListContainer" class="film-list">
-            <!-- Kartu film dirender otomatis oleh JavaScript -->
-        </div>
+<a class="nav-link <?= $page==='dashboard'?'active':'' ?>" href="?page=dashboard">
+<i class="bi bi-grid-1x2"></i><span>Dashboard</span>
+</a>
 
-        <div class="main-footer">
-            <button class="btn-action" onclick="kembaliKeLogin()">KEMBALI</button>
-            <button class="btn-action" onclick="hapusPesanan()">HAPUS PESANAN</button>
-            <button class="btn-action" onclick="saveData()">SAVE DATA</button>
-            <button class="btn-action btn-pay-next" onclick="lanjutPembayaran()">TAMBAH PESANAN &amp; BAYAR</button>
-        </div>
-    </div>
+<?php if (can(array('admin'))): ?>
+<a class="nav-link <?= $page==='users'?'active':'' ?>" href="?page=users">
+<i class="bi bi-people"></i><span>Manajemen User</span>
+</a>
+<a class="nav-link <?= $page==='tarif'?'active':'' ?>" href="?page=tarif">
+<i class="bi bi-cash-stack"></i><span>Tarif Parkir</span>
+</a>
+<a class="nav-link <?= $page==='area'?'active':'' ?>" href="?page=area">
+<i class="bi bi-pin-map"></i><span>Area Parkir</span>
+</a>
+<?php endif; ?>
 
-    <!-- ==========================================
-         3. HALAMAN PEMBAYARAN
-         ========================================== -->
-    <div id="paymentSection" class="payment-box hidden">
-        <div class="payment-title">DETAIL PEMBAYARAN</div>
-        <div id="receiptArea" class="receipt-area"></div>
-        <div id="totalLabel" class="total-label">Total Bayar: Rp 0</div>
+<?php if (can(array('admin','petugas'))): ?>
+<a class="nav-link <?= $page==='kendaraan'?'active':'' ?>" href="?page=kendaraan">
+<i class="bi bi-car-front"></i><span>Kendaraan</span>
+</a>
+<a class="nav-link <?= $page==='transaksi'?'active':'' ?>" href="?page=transaksi">
+<i class="bi bi-arrow-left-right"></i><span>Transaksi</span>
+</a>
+<?php endif; ?>
 
-        <div class="payment-method">
-            <label for="comboMetode">Pilih Metode Pembayaran:</label>
-            <select id="comboMetode">
-                <option value="DANA QR">DANA QR</option>
-                <option value="GOPAY QR">GOPAY QR</option>
-                <option value="OVO QR">OVO QR</option>
-                <option value="Mobile Banking BCA">Mobile Banking BCA</option>
-                <option value="Mobile Banking MANDIRI">Mobile Banking MANDIRI</option>
-                <option value="Mobile Banking BNI">Mobile Banking BNI</option>
-                <option value="Mobile Banking BRI">Mobile Banking BRI</option>
-            </select>
-        </div>
+<?php if (can(array('admin','owner'))): ?>
+<a class="nav-link <?= $page==='laporan'?'active':'' ?>" href="?page=laporan">
+<i class="bi bi-bar-chart"></i><span>Laporan</span>
+</a>
+<?php endif; ?>
 
-        <div class="payment-buttons">
-            <button class="btn-action" onclick="kembaliKeMenu()">Kembali</button>
-            <button class="btn-confirm" onclick="prosesBayar()">BAYAR SEKARANG</button>
-        </div>
-    </div>
+<?php if (can(array('admin'))): ?>
+<a class="nav-link <?= $page==='log'?'active':'' ?>" href="?page=log">
+<i class="bi bi-clock-history"></i><span>Log Aktivitas</span>
+</a>
+<?php endif; ?>
+</div>
 
-    <!-- ==========================================
-         4. HALAMAN PEMUTARAN FILM (SLIDE YOUTUBE)
-         ========================================== -->
-    <div id="theaterSection" class="theater-box hidden">
-        <div id="playerActiveArea">
-            <div class="theater-header">
-                <span id="slideBadge" class="slide-badge">SLIDE 1 DARI 1</span>
-                <span id="nowPlayingTitle" class="now-playing-title">SEDANG MEMUTAR: -</span>
-            </div>
+<div class="position-absolute bottom-0 w-100 p-3">
+<a class="nav-link" href="?page=profile">
+<i class="bi bi-person-circle"></i><span>Profil</span>
+</a>
+<a class="nav-link" href="?page=logout">
+<i class="bi bi-box-arrow-right"></i><span>Logout</span>
+</a>
+</div>
+</aside>
 
-            <div class="video-wrapper">
-                <iframe id="youtubePlayer"
-                        src=""
-                        title="Pemutar Film Bioskop Aldo"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowfullscreen>
-                </iframe>
-            </div>
+<main class="main">
+<header class="topbar">
+<div>
+<h5 class="mb-0 fw-bold"><?=e(pageTitle($page))?></h5>
+<small class="text-secondary"><?=date('d/m/Y H:i')?> WIB</small>
+</div>
+<div class="d-flex align-items-center gap-2">
+<img class="avatar" src="<?=e(getPhoto(currentUser()))?>" onerror="this.src='foto/<?=e(currentUser()['level'])?>.svg'">
+<div class="user-side">
+<div class="fw-semibold"><?=e(currentUser()['nama_lengkap'])?></div>
+<small class="text-secondary text-capitalize"><?=e(currentUser()['level'])?></small>
+</div>
+</div>
+</header>
 
-            <div class="theater-controls">
-                <a id="directYtLink" class="direct-yt-link" href="#" target="_blank" rel="noopener">
-                    Buka langsung di YouTube jika layar dibatasi
-                </a>
-                <button id="btnNextSlide" class="btn-next-slide" onclick="nextSlide()">
-                    NEXT SLIDE ⏭
-                </button>
-            </div>
-        </div>
+<div class="content">
+<div class="d-flex justify-content-end mb-3 no-print">
+<a class="btn btn-outline-success" href="?export=excel"><i class="bi bi-file-earmark-excel"></i> Ekspor Excel (4 Sheet)</a>
+</div>
+<?php showFlash(); ?>
 
-        <div id="thankYouArea" class="thank-you-screen hidden">
-            <h2>Terimakasih udah menonton<br>Bioskop aldo</h2>
-            <p id="redirectCountdown">Otomatis kembali ke menu utama login customer dalam 3 detik...</p>
-        </div>
-    </div>
+<?php if ($page === 'dashboard'): ?>
 
-    <script>
-        // ==========================================
-        // DATA FILM & LINK YOUTUBE LANGSUNG TAYANG
-        // ==========================================
-        const daftarFilm = [
-            {
-                id: 0,
-                nama: "Avatar: The Way of Water",
-                genre: "Sci-Fi / Action",
-                harga: 55000,
-                hariLalu: 5,
-                youtubeId: "LU5nxqxucWY",
-                youtubeUrl: "https://youtu.be/LU5nxqxucWY?si=3vpA7S2ZkXX15CGO"
-            },
-            {
-                id: 1,
-                nama: "John Wick 4",
-                genre: "Action / Crime",
-                harga: 50000,
-                hariLalu: 10,
-                youtubeId: "ZsILQqRpMp0",
-                youtubeUrl: "https://youtu.be/ZsILQqRpMp0?si=dYIxz_yya-2l7ccn"
-            },
-            {
-                id: 2,
-                nama: "Transformers: Rise",
-                genre: "Action / Mecha",
-                harga: 45000,
-                hariLalu: 15,
-                youtubeId: "Gh44m59Jolc",
-                youtubeUrl: "https://youtu.be/Gh44m59Jolc?si=oF9bqp1HExiKuTRr"
-            }
-        ];
+<div class="d-flex justify-content-between align-items-center mb-4">
+<div>
+<h3 class="fw-bold mb-1">Selamat datang, <?=e(explode(' ',currentUser()['nama_lengkap'])[0])?> 👋</h3>
+<p class="text-secondary mb-0">Pantau operasional parkir secara modern dan real-time.</p>
+</div>
+<?php if (can(array('admin','petugas'))): ?>
+<a class="btn btn-primary" href="?page=transaksi&aksi=masuk">
+<i class="bi bi-plus-lg"></i> Parkir Masuk
+</a>
+<?php endif; ?>
+</div>
 
-        let antreanFilmDiputar = [];
-        let indexSlideAktif = 0;
+<div class="row g-3 mb-3">
+<?php
+$stats = array(
+array('Kendaraan Masuk Hari Ini',$masukHari,'bi-box-arrow-in-right'),
+array('Kendaraan Keluar Hari Ini',$keluarHari,'bi-box-arrow-right'),
+array('Masih Terparkir',$terparkir,'bi-car-front'),
+array('Slot Tersedia',$tersedia,'bi-p-square')
+);
+foreach ($stats as $st):
+?>
+<div class="col-sm-6 col-xl-3">
+<div class="card stat h-100">
+<div class="d-flex justify-content-between align-items-center">
+<div><small class="text-secondary"><?=e($st[0])?></small><h3 class="fw-bold mt-2 mb-0"><?=e($st[1])?></h3></div>
+<div class="stat-icon"><i class="bi <?=e($st[2])?>"></i></div>
+</div>
+</div>
+</div>
+<?php endforeach; ?>
+</div>
 
-        // ==========================================
-        // FORMAT TANGGAL OTOMATIS INDONESIA
-        // ==========================================
-        function formatTanggalIndonesia(dateObj) {
-            const bulan = [
-                "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-                "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-            ];
-            const tgl = String(dateObj.getDate()).padStart(2, "0");
-            const bln = bulan[dateObj.getMonth()];
-            const thn = dateObj.getFullYear();
-            return `${tgl} ${bln} ${thn}`;
-        }
+<div class="row g-3 mb-3">
+<div class="col-xl-8">
+<div class="card p-4 h-100">
+<div class="d-flex justify-content-between">
+<div><h6 class="fw-bold">Pendapatan 7 Hari</h6><p class="text-secondary small">Ringkasan transaksi keluar</p></div>
+<h5 class="fw-bold"><?=rupiah($pendapatanHari)?></h5>
+</div>
+<div class="chartbar mt-3">
+<?php $mx = 1; foreach($daily as $d){if($d['total']>$mx)$mx=$d['total'];} ?>
+<?php foreach($daily as $d): ?>
+<div class="flex-fill">
+<div class="bar" style="height:<?=max(3,round($d['total']/$mx*145))?>px" title="<?=rupiah($d['total'])?>"></div>
+<div class="chartlabel"><?=date('d/m',strtotime($d['date']))?></div>
+</div>
+<?php endforeach; ?>
+</div>
+</div>
+</div>
 
-        function getTanggalHariIni() {
-            return formatTanggalIndonesia(new Date());
-        }
+<div class="col-xl-4">
+<div class="card p-4 h-100">
+<h6 class="fw-bold">Ringkasan Keuangan</h6>
+<div class="quick mt-3 d-flex justify-content-between"><span>Hari ini</span><b><?=rupiah($pendapatanHari)?></b></div>
+<div class="quick mt-2 d-flex justify-content-between"><span>Bulan ini</span><b><?=rupiah($pendapatanBulan)?></b></div>
+<hr>
+<h6 class="fw-bold mb-3">Kendaraan Terparkir</h6>
+<?php foreach($jenisCounts as $j=>$n): $pct=$terparkir?round($n/$terparkir*100):0; ?>
+<div class="mb-3">
+<div class="d-flex justify-content-between small"><span><?=e($j)?></span><b><?=$n?></b></div>
+<div class="progress mt-1"><div class="progress-bar" style="width:<?=$pct?>%"></div></div>
+</div>
+<?php endforeach; ?>
+</div>
+</div>
+</div>
+</div>
 
-        function getTanggalRilis(hariLalu) {
-            const d = new Date();
-            d.setDate(d.getDate() - hariLalu);
-            return formatTanggalIndonesia(d);
-        }
+<div class="card p-4">
+<div class="d-flex justify-content-between mb-3">
+<h6 class="fw-bold mb-0">Transaksi Terbaru</h6>
+<?php if(can(array('admin','petugas'))): ?><a href="?page=transaksi" class="small">Lihat semua</a><?php endif; ?>
+</div>
+<div class="table-responsive">
+<table class="table">
+<thead><tr><th>Kode</th><th>Plat</th><th>Jenis</th><th>Area</th><th>Masuk</th><th>Status</th><th>Total</th></tr></thead>
+<tbody>
+<?php foreach($recent as $r): ?>
+<tr>
+<td><b><?=e($r['kode_transaksi'])?></b></td>
+<td><?=e($r['nomor_polisi'])?></td>
+<td><?=e($r['jenis_kendaraan'])?></td>
+<td><?=e($r['nama_area'] ? $r['nama_area'] : '-')?></td>
+<td><?=date('d/m/Y H:i',strtotime($r['waktu_masuk']))?></td>
+<td><span class="badge <?=$r['status']==='Masuk'?'text-bg-warning':'text-bg-success'?>"><?=e($r['status'])?></span></td>
+<td><?=rupiah($r['total_bayar'])?></td>
+</tr>
+<?php endforeach; ?>
+</tbody>
+</table>
+</div>
+</div>
 
-        // ==========================================
-        // EFEK SUARA BIOSKOP (WEB AUDIO API)
-        // ==========================================
-        function playSound() {
-            try {
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                const ctx = new AudioCtx();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = "sine";
-                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // Nada D5
-                osc.frequency.setValueAtTime(880, ctx.currentTime + 0.12); // Nada A5
-                gain.gain.setValueAtTime(0.15, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.4);
-            } catch (e) {
-                // Abaikan jika browser memblokir autoplay audio
-            }
-        }
+<?php elseif ($page === 'users' && can(array('admin'))): ?>
 
-        // ==========================================
-        // RENDER DAFTAR FILM & GAMBAR OTOMATIS
-        // ==========================================
-        function renderDaftarFilm() {
-            document.getElementById("headerDate").textContent = "Tanggal Hari Ini: " + getTanggalHariIni();
-            const container = document.getElementById("filmListContainer");
-            container.innerHTML = "";
+<?php
+$edit = null;
+if (isset($_GET['edit'])) {
+    $stmt=$pdo->prepare("SELECT * FROM users WHERE id=?");
+    $stmt->execute(array((int)$_GET['edit']));
+    $edit=$stmt->fetch();
+}
+$users=$pdo->query("SELECT * FROM users ORDER BY id DESC")->fetchAll();
+?>
 
-            const savedQty = JSON.parse(localStorage.getItem("bioskopAldoQty") || "[0,0,0]");
+<div class="d-flex justify-content-between mb-3">
+<p class="text-secondary">Kelola 3 user: Admin, Petugas, dan Owner.</p>
+<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal">+ Tambah User</button>
+</div>
 
-            daftarFilm.forEach((film, idx) => {
-                const thumbUrl = `https://img.youtube.com/vi/${film.youtubeId}/hqdefault.jpg`;
-                const qtyAwal = savedQty[idx] || 0;
+<div class="row g-3 mb-3">
+<?php foreach($users as $u): ?>
+<div class="col-md-4">
+<div class="card p-4 h-100">
+<div class="d-flex align-items-center gap-3">
+<img class="avatar" style="width:64px;height:64px" src="<?=e(getPhoto($u))?>" onerror="this.src='foto/<?=e($u['level'])?>.svg'">
+<div>
+<h5 class="fw-bold mb-1"><?=e($u['nama_lengkap'])?></h5>
+<div class="text-secondary">@<?=e($u['username'])?></div>
+<span class="badge badge-soft text-capitalize mt-1"><?=e($u['level'])?></span>
+</div>
+</div>
+<div class="small text-secondary mt-3"><?=e($u['email'] ? $u['email'] : 'Email belum diisi')?></div>
+<div class="mt-3">
+<a class="btn btn-sm btn-outline-primary" href="?page=users&edit=<?=$u['id']?>">Edit</a>
+<?php if($u['id']!=(int)currentUser()['id']): ?>
+<form method="post" class="d-inline" onsubmit="return confirm('Hapus user ini?')">
+<input type="hidden" name="csrf" value="<?=e(csrf())?>">
+<input type="hidden" name="action" value="delete_user">
+<input type="hidden" name="id" value="<?=$u['id']?>">
+<button class="btn btn-sm btn-outline-danger">Hapus</button>
+</form>
+<?php endif; ?>
+</div>
+</div>
+</div>
+<?php endforeach; ?>
+</div>
 
-                const card = document.createElement("div");
-                card.className = "film-card";
-                card.innerHTML = `
-                    <img class="film-poster"
-                         src="${thumbUrl}"
-                         alt="${film.nama}"
-                         onerror="this.src='https://via.placeholder.com/105x145/2c3e50/ffffff?text=FILM+${idx + 1}'">
-                    <div class="film-info">
-                        <h2>${film.nama}</h2>
-                        <div class="meta">Genre: ${film.genre}</div>
-                        <div class="meta">Rilis: ${getTanggalRilis(film.hariLalu)}</div>
-                        <div class="price">Harga: Rp ${film.harga}</div>
-                    </div>
-                    <div class="film-order">
-                        <label>Pesan Tiket:</label>
-                        <div class="qty-control">
-                            <button type="button" onclick="ubahQty(${idx}, -1)">-</button>
-                            <input type="number" id="qty_${idx}" value="${qtyAwal}" min="0" max="10" readonly>
-                            <button type="button" onclick="ubahQty(${idx}, 1)">+</button>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
+<div class="card p-4">
+<div class="table-responsive">
+<table class="table">
+<thead><tr><th>Foto</th><th>Nama</th><th>Username</th><th>Level</th><th>Status</th><th>Aksi</th></tr></thead>
+<tbody>
+<?php foreach($users as $u): ?>
+<tr>
+<td><img class="avatar" src="<?=e(getPhoto($u))?>" onerror="this.src='foto/<?=e($u['level'])?>.svg'"></td>
+<td><b><?=e($u['nama_lengkap'])?></b></td>
+<td><?=e($u['username'])?></td>
+<td><span class="badge badge-soft text-capitalize"><?=e($u['level'])?></span></td>
+<td><span class="badge <?=$u['status']==='Aktif'?'text-bg-success':'text-bg-secondary'?>"><?=e($u['status'])?></span></td>
+<td><a class="btn btn-sm btn-outline-primary" href="?page=users&edit=<?=$u['id']?>">Edit</a></td>
+</tr>
+<?php endforeach; ?>
+</tbody>
+</table>
+</div>
+</div>
 
-        function ubahQty(index, delta) {
-            const input = document.getElementById(`qty_${index}`);
-            let val = parseInt(input.value, 10) || 0;
-            val = Math.min(10, Math.max(0, val + delta));
-            input.value = val;
-        }
+<div class="modal fade" id="userModal">
+<div class="modal-dialog modal-lg"><div class="modal-content">
+<form method="post">
+<div class="modal-header"><h5><?= $edit?'Edit User':'Tambah User'?></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+<div class="modal-body">
+<input type="hidden" name="csrf" value="<?=e(csrf())?>">
+<input type="hidden" name="action" value="save_user">
+<input type="hidden" name="id" value="<?=e($edit ? $edit['id'] : 0)?>">
+<div class="row">
+<div class="col-md-6">
+<label class="form-label">Nama Lengkap</label>
+<input class="form-control mb-3" name="nama_lengkap" value="<?=e($edit ? $edit['nama_lengkap'] : '')?>" required>
+<label class="form-label">Username</label>
+<input class="form-control mb-3" name="username" value="<?=e($edit ? $edit['username'] : '')?>" required>
+<label class="form-label">Password <?= $edit?'<small class="text-secondary">(kosong = tidak diubah)</small>':''?></label>
+<input class="form-control mb-3" type="password" name="password">
+</div>
+<div class="col-md-6">
+<label class="form-label">Level</label>
+<select class="form-select mb-3" name="level">
+<?php foreach(array('admin','petugas','owner') as $x): ?>
+<option value="<?=e($x)?>" <?=$x===($edit?$edit['level']:'petugas')?'selected':''?>><?=e(ucfirst($x))?></option>
+<?php endforeach; ?>
+</select>
+<label class="form-label">Status</label>
+<select class="form-select mb-3" name="status">
+<option value="Aktif" <?=($edit?$edit['status']:'Aktif')==='Aktif'?'selected':''?>>Aktif</option>
+<option value="Nonaktif" <?=($edit?$edit['status']:'Aktif')==='Nonaktif'?'selected':''?>>Nonaktif</option>
+</select>
+<label class="form-label">Email</label>
+<input class="form-control" name="email" value="<?=e($edit?$edit['email']:'')?>">
+</div>
+</div>
+</div>
+<div class="modal-footer"><button class="btn btn-primary">Simpan User</button></div>
+</form>
+</div></div></div>
 
-        // ==========================================
-        // NAVIGASI HALAMAN & TRANSAKSI
-        // ==========================================
-        function tampilkanHalaman(idHalaman) {
-            ["loginSection", "mainSection", "paymentSection", "theaterSection"].forEach(id => {
-                document.getElementById(id).classList.add("hidden");
-            });
-            document.getElementById(idHalaman).classList.remove("hidden");
-        }
+<?php if($edit): ?>
+<script>
+window.addEventListener('load',function(){
+new bootstrap.Modal(document.getElementById('userModal')).show();
+});
+</script>
+<?php endif; ?>
 
-        function prosesLogin() {
-            const user = document.getElementById("txtUser").value.trim();
-            const pass = document.getElementById("txtPass").value.trim();
+<?php elseif ($page === 'tarif' && can(array('admin'))): ?>
 
-            if (user === "aldo" && pass === "aldo123") {
-                playSound();
-                renderDaftarFilm();
-                tampilkanHalaman("mainSection");
-            } else {
-                alert("Username atau Password Salah!");
-            }
-        }
+<?php $tarifs=$pdo->query("SELECT * FROM tarif ORDER BY id")->fetchAll(); ?>
+<p class="text-secondary">Atur tarif per jam dan tarif maksimal. Sistem mencegah jenis tarif ganda.</p>
+<div class="row g-3">
+<?php foreach($tarifs as $t): ?>
+<div class="col-md-4">
+<div class="card p-4">
+<div class="d-flex justify-content-between">
+<h5 class="fw-bold"><?=e($t['jenis_kendaraan'])?></h5>
+<i class="bi bi-cash-coin fs-4 text-primary"></i>
+</div>
+<form method="post" class="mt-3">
+<input type="hidden" name="csrf" value="<?=e(csrf())?>">
+<input type="hidden" name="action" value="save_tarif">
+<input type="hidden" name="id" value="<?=$t['id']?>">
+<label class="form-label">Jenis Kendaraan</label>
+<select class="form-select mb-3" name="jenis_kendaraan">
+<?php foreach(array('Motor','Mobil','Bus/Truk') as $x): ?>
+<option value="<?=e($x)?>" <?=$x===$t['jenis_kendaraan']?'selected':''?>><?=e($x)?></option>
+<?php endforeach; ?>
+</select>
+<label class="form-label">Tarif / Jam</label>
+<input class="form-control mb-3" type="number" name="tarif_per_jam" value="<?=$t['tarif_per_jam']?>" min="0" required>
+<label class="form-label">Tarif Maksimal</label>
+<input class="form-control mb-3" type="number" name="tarif_maksimal" value="<?=$t['tarif_maksimal']?>" min="0" required>
+<button class="btn btn-primary w-100">Simpan Tarif</button>
+</form>
+</div>
+</div>
+<?php endforeach; ?>
+</div>
 
-        function kembaliKeLogin() {
-            document.getElementById("youtubePlayer").src = "";
-            document.getElementById("txtUser").value = "";
-            document.getElementById("txtPass").value = "";
-            tampilkanHalaman("loginSection");
-        }
+<?php elseif ($page === 'area' && can(array('admin'))): ?>
 
-        function hapusPesanan() {
-            daftarFilm.forEach((_, idx) => {
-                document.getElementById(`qty_${idx}`).value = 0;
-            });
-            localStorage.removeItem("bioskopAldoQty");
-            alert("Semua pesanan dihapus!");
-        }
+<?php
+$areas=$pdo->query(
+"SELECT a.*,(SELECT COUNT(*) FROM transaksi t WHERE t.area_id=a.id AND t.status='Masuk') terisi
+ FROM area_parkir a ORDER BY a.id DESC"
+)->fetchAll();
 
-        function saveData() {
-            const currentQty = daftarFilm.map((_, idx) => parseInt(document.getElementById(`qty_${idx}`).value, 10) || 0);
-            localStorage.setItem("bioskopAldoQty", JSON.stringify(currentQty));
-            document.getElementById("headerDate").textContent = "Tanggal Hari Ini: " + getTanggalHariIni();
-            playSound();
-            alert("Data Film & Tanggal berhasil di-save dan diperbarui!");
-        }
+$edit=null;
+if(isset($_GET['edit'])){
+$stmt=$pdo->prepare("SELECT * FROM area_parkir WHERE id=?");
+$stmt->execute(array((int)$_GET['edit']));
+$edit=$stmt->fetch();
+}
+?>
 
-        function lanjutPembayaran() {
-            let totalHarga = 0;
-            let rincian = `Tanggal Transaksi: ${getTanggalHariIni()}\n\n`;
-            antreanFilmDiputar = [];
+<div class="d-flex justify-content-between mb-3">
+<p class="text-secondary">Kelola lokasi, jenis kendaraan, kapasitas, dan status area.</p>
+<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#areaModal">+ Tambah Area</button>
+</div>
 
-            daftarFilm.forEach((film, idx) => {
-                const qty = parseInt(document.getElementById(`qty_${idx}`).value, 10) || 0;
-                if (qty > 0) {
-                    const sub = qty * film.harga;
-                    totalHarga += sub;
-                    rincian += `- ${film.nama} (x${qty}) = Rp ${sub}\n`;
-                    // Masukkan film ke antrean slide pemutaran
-                    antreanFilmDiputar.push(film);
-                }
-            });
+<div class="row g-3">
+<?php foreach($areas as $a): $pct=$a['kapasitas']?min(100,round($a['terisi']/$a['kapasitas']*100)):0; ?>
+<div class="col-md-6 col-xl-3">
+<div class="card p-4 h-100">
+<div class="d-flex justify-content-between">
+<span class="badge badge-soft"><?=e($a['kode_area'])?></span>
+<span class="badge <?=$a['status']==='Aktif'?'text-bg-success':'text-bg-secondary'?>"><?=e($a['status'])?></span>
+</div>
+<h5 class="fw-bold mt-3"><?=e($a['nama_area'])?></h5>
+<small class="text-secondary"><?=e($a['jenis_kendaraan'])?></small>
+<div class="mt-3 d-flex justify-content-between small"><span>Terisi</span><b><?=$a['terisi']?> / <?=$a['kapasitas']?></b></div>
+<div class="progress my-2"><div class="progress-bar" style="width:<?=$pct?>%"></div></div>
+<div class="d-flex gap-2 mt-3">
+<a href="?page=area&edit=<?=$a['id']?>" class="btn btn-sm btn-outline-primary flex-fill">Edit</a>
+<form method="post" class="flex-fill" onsubmit="return confirm('Hapus area?')">
+<input type="hidden" name="csrf" value="<?=e(csrf())?>">
+<input type="hidden" name="action" value="delete_area">
+<input type="hidden" name="id" value="<?=$a['id']?>">
+<button class="btn btn-sm btn-outline-danger w-100">Hapus</button>
+</form>
+</div>
+</div>
+</div>
+<?php endforeach; ?>
+</div>
 
-            if (totalHarga === 0) {
-                alert("Pilih minimal 1 film terlebih dahulu!");
-                return;
-            }
+<div class="modal fade" id="areaModal">
+<div class="modal-dialog"><div class="modal-content">
+<form method="post">
+<div class="modal-header"><h5><?= $edit?'Edit Area':'Tambah Area'?></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+<div class="modal-body">
+<input type="hidden" name="csrf" value="<?=e(csrf())?>">
+<input type="hidden" name="action" value="save_area">
+<input type="hidden" name="id" value="<?=e($edit?$edit['id']:0)?>">
+<label class="form-label">Kode Area</label>
+<input class="form-control mb-3" name="kode_area" value="<?=e($edit?$edit['kode_area']:'')?>" required>
+<label class="form-label">Nama Area</label>
+<input class="form-control mb-3" name="nama_area" value="<?=e($edit?$edit['nama_area']:'')?>" required>
+<label class="form-label">Jenis Kendaraan</label>
+<select class="form-select mb-3" name="jenis_kendaraan">
+<?php foreach(array('Motor','Mobil','Bus/Truk','Semua') as $x): ?>
+<option value="<?=e($x)?>" <?=$x===($edit?$edit['jenis_kendaraan']:'Semua')?'selected':''?>><?=e($x)?></option>
+<?php endforeach; ?>
+</select>
+<label class="form-label">Kapasitas</label>
+<input class="form-control mb-3" type="number" name="kapasitas" min="1" value="<?=e($edit?$edit['kapasitas']:10)?>" required>
+<label class="form-label">Status</label>
+<select class="form-select" name="status">
+<option value="Aktif" <?=($edit?$edit['status']:'Aktif')==='Aktif'?'selected':''?>>Aktif</option>
+<option value="Nonaktif" <?=($edit?$edit['status']:'Aktif')==='Nonaktif'?'selected':''?>>Nonaktif</option>
+</select>
+</div>
+<div class="modal-footer"><button class="btn btn-primary">Simpan Area</button></div>
+</form>
+</div></div></div>
 
-            document.getElementById("receiptArea").textContent = rincian;
-            document.getElementById("totalLabel").textContent = "Total Bayar: Rp " + totalHarga;
-            tampilkanHalaman("paymentSection");
-        }
+<?php if($edit): ?>
+<script>
+window.addEventListener('load',function(){
+new bootstrap.Modal(document.getElementById('areaModal')).show();
+});
+</script>
+<?php endif; ?>
 
-        function kembaliKeMenu() {
-            tampilkanHalaman("mainSection");
-        }
+<?php elseif ($page === 'kendaraan' && can(array('admin','petugas'))): ?>
 
-        function prosesBayar() {
-            const metode = document.getElementById("comboMetode").value;
-            playSound();
-            alert(`Pembayaran berhasil menggunakan ${metode} pada ${getTanggalHariIni()}`);
+<?php
+$q=trim(isset($_GET['q'])?$_GET['q']:'');
+$sql="SELECT * FROM kendaraan";
+$params=array();
+if($q){
+$sql.=" WHERE nomor_polisi LIKE ? OR nama_pemilik LIKE ?";
+$params=array('%'.$q.'%','%'.$q.'%');
+} else {
+$sql.=" WHERE DATE(created_at)=CURDATE()";
+}
+$sql.=" ORDER BY id DESC";
+$stmt=$pdo->prepare($sql);$stmt->execute($params);$cars=$stmt->fetchAll();
 
-            // Reset tiket tersimpan setelah dibayar
-            localStorage.removeItem("bioskopAldoQty");
-            daftarFilm.forEach((_, idx) => {
-                const el = document.getElementById(`qty_${idx}`);
-                if (el) el.value = 0;
-            });
+$edit=null;
+if(isset($_GET['edit'])){
+$stmt=$pdo->prepare("SELECT * FROM kendaraan WHERE id=?");
+$stmt->execute(array((int)$_GET['edit']));
+$edit=$stmt->fetch();
+}
+?>
 
-            // Mulai pemutaran slide film dari Slide 1
-            indexSlideAktif = 0;
-            document.getElementById("playerActiveArea").classList.remove("hidden");
-            document.getElementById("thankYouArea").classList.add("hidden");
-            tampilkanHalaman("theaterSection");
-            muatSlideFilm(indexSlideAktif);
-        }
+<div class="d-flex justify-content-between mb-3">
+<form class="d-flex gap-2">
+<input type="hidden" name="page" value="kendaraan">
+<input class="form-control" name="q" placeholder="Cari plat/pemilik..." value="<?=e($q)?>">
+<button class="btn btn-outline-secondary">Cari</button>
+</form>
+<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#carModal">+ Kendaraan</button>
+</div>
 
-        // ==========================================
-        // LOGIKA SLIDE PEMUTARAN FILM YOUTUBE
-        // ==========================================
-        function muatSlideFilm(index) {
-            const film = antreanFilmDiputar[index];
-            const totalSlide = antreanFilmDiputar.length;
+<div class="card p-4">
+<div class="table-responsive">
+<table class="table">
+<thead><tr><th>Plat</th><th>Jenis</th><th>Merk</th><th>Warna</th><th>Pemilik</th><th>No. HP</th><th>Aksi</th></tr></thead>
+<tbody>
+<?php foreach($cars as $c): ?>
+<tr>
+<td><span class="badge text-bg-dark"><?=e($c['nomor_polisi'])?></span></td>
+<td><?=e($c['jenis_kendaraan'])?></td>
+<td><?=e($c['merk']?$c['merk']:'-')?></td>
+<td><?=e($c['warna']?$c['warna']:'-')?></td>
+<td><?=e($c['nama_pemilik']?$c['nama_pemilik']:'-')?></td>
+<td><?=e($c['no_hp']?$c['no_hp']:'-')?></td>
+<td>
+<a class="btn btn-sm btn-outline-primary" href="?page=kendaraan&edit=<?=$c['id']?>">Edit</a>
+<?php if(can(array('admin'))): ?>
+<form class="d-inline" method="post" onsubmit="return confirm('Hapus kendaraan?')">
+<input type="hidden" name="csrf" value="<?=e(csrf())?>">
+<input type="hidden" name="action" value="delete_kendaraan">
+<input type="hidden" name="id" value="<?=$c['id']?>">
+<button class="btn btn-sm btn-outline-danger">Hapus</button>
+</form>
+<?php endif; ?>
+</td>
+</tr>
+<?php endforeach; ?>
+</tbody>
+</table>
+</div>
+</div>
 
-            document.getElementById("slideBadge").textContent = `SLIDE ${index + 1} DARI ${totalSlide}`;
-            document.getElementById("nowPlayingTitle").textContent = `SEDANG MEMUTAR: ${film.nama}`;
-            document.getElementById("directYtLink").href = film.youtubeUrl;
+<div class="modal fade" id="carModal">
+<div class="modal-dialog"><div class="modal-content">
+<form method="post">
+<div class="modal-header"><h5><?= $edit?'Edit Kendaraan':'Tambah Kendaraan'?></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+<div class="modal-body">
+<input type="hidden" name="csrf" value="<?=e(csrf())?>">
+<input type="hidden" name="action" value="save_kendaraan">
+<input type="hidden" name="id" value="<?=e($edit?$edit['id']:0)?>">
+<label class="form-label">Nomor Polisi</label>
+<input class="form-control mb-3" name="nomor_polisi" value="<?=e($edit?$edit['nomor_polisi']:'')?>" required>
+<label class="form-label">Jenis</label>
+<select class="form-select mb-3" name="jenis_kendaraan">
+<?php foreach(array('Motor','Mobil','Bus/Truk') as $x): ?>
+<option value="<?=e($x)?>" <?=$x===($edit?$edit['jenis_kendaraan']:'Motor')?'selected':''?>><?=e($x)?></option>
+<?php endforeach; ?>
+</select>
+<div class="row">
+<div class="col-6"><label class="form-label">Merk</label><input class="form-control mb-3" name="merk" value="<?=e($edit?$edit['merk']:'')?>"></div>
+<div class="col-6"><label class="form-label">Warna</label><input class="form-control mb-3" name="warna" value="<?=e($edit?$edit['warna']:'')?>"></div>
+</div>
+<label class="form-label">Nama Pemilik</label>
+<input class="form-control mb-3" name="nama_pemilik" value="<?=e($edit?$edit['nama_pemilik']:'')?>">
+<label class="form-label">No. HP</label>
+<input class="form-control" name="no_hp" value="<?=e($edit?$edit['no_hp']:'')?>">
+</div>
+<div class="modal-footer"><button class="btn btn-primary">Simpan Kendaraan</button></div>
+</form>
+</div></div></div>
 
-            // Embed YouTube langsung diputar
-            document.getElementById("youtubePlayer").src =
-                `https://www.youtube.com/embed/${film.youtubeId}?autoplay=1&rel=0`;
+<?php if($edit): ?>
+<script>
+window.addEventListener('load',function(){
+new bootstrap.Modal(document.getElementById('carModal')).show();
+});
+</script>
+<?php endif; ?>
 
-            const btnNext = document.getElementById("btnNextSlide");
-            if (index < totalSlide - 1) {
-                const filmBerikutnya = antreanFilmDiputar[index + 1].nama;
-                btnNext.textContent = `NEXT SLIDE (${filmBerikutnya}) ⏭`;
-            } else {
-                btnNext.textContent = "SELESAI MENONTON 🎬";
-            }
-        }
+<?php elseif ($page === 'transaksi' && can(array('admin','petugas'))): ?>
 
-        function nextSlide() {
-            if (indexSlideAktif < antreanFilmDiputar.length - 1) {
-                indexSlideAktif++;
-                muatSlideFilm(indexSlideAktif);
-            } else {
-                // Semua slide film selesai -> tampilkan ucapan & otomatis kembali ke Login Customer
-                document.getElementById("youtubePlayer").src = "";
-                document.getElementById("playerActiveArea").classList.add("hidden");
-                document.getElementById("thankYouArea").classList.remove("hidden");
+<?php
+$aksi=isset($_GET['aksi'])?$_GET['aksi']:'';
+if($aksi==='masuk'):
+$areas=$pdo->query(
+"SELECT * FROM area_parkir WHERE status='Aktif' ORDER BY nama_area"
+)->fetchAll();
+?>
 
-                let detik = 3;
-                const infoEl = document.getElementById("redirectCountdown");
-                infoEl.textContent = `Otomatis kembali ke menu utama login customer dalam ${detik} detik...`;
+<div class="row justify-content-center">
+<div class="col-xl-8">
+<div class="card p-4">
+<h5 class="fw-bold mb-1">Catat Kendaraan Masuk</h5>
+<p class="text-secondary">Isi data kendaraan dan pilih area parkir yang sesuai.</p>
+<form method="post">
+<input type="hidden" name="csrf" value="<?=e(csrf())?>">
+<input type="hidden" name="action" value="parkir_masuk">
+<div class="row">
+<div class="col-md-6 mb-3">
+<label class="form-label">Nomor Polisi</label>
+<input class="form-control form-control-lg" name="nomor_polisi" placeholder="BK 1234 XX" required>
+</div>
+<div class="col-md-6 mb-3">
+<label class="form-label">Jenis Kendaraan</label>
+<select class="form-select form-select-lg" name="jenis_kendaraan" required>
+<option value="">Pilih</option><option>Motor</option><option>Mobil</option><option>Bus/Truk</option>
+</select>
+</div>
+</div>
+<div class="mb-3">
+<label class="form-label">Area Parkir</label>
+<select class="form-select" name="area_id" required>
+<option value="">Pilih area</option>
+<?php foreach($areas as $a): ?>
+<option value="<?=$a['id']?>"><?=e($a['kode_area'].' - '.$a['nama_area'].' ('.$a['jenis_kendaraan'].', kapasitas '.$a['kapasitas'].')')?></option>
+<?php endforeach; ?>
+</select>
+</div>
+<div class="mb-4">
+<label class="form-label">Nama Pemilik (opsional)</label>
+<input class="form-control" name="nama_pemilik">
+</div>
+<button class="btn btn-primary btn-lg w-100">Simpan Parkir Masuk</button>
+</form>
+</div>
+</div>
+</div>
 
-                const interval = setInterval(() => {
-                    detik--;
-                    if (detik > 0) {
-                        infoEl.textContent = `Otomatis kembali ke menu utama login customer dalam ${detik} detik...`;
-                    } else {
-                        clearInterval(interval);
-                        kembaliKeLogin();
-                    }
-                }, 1000);
-            }
-        }
+<?php else:
+$active=$pdo->query(
+"SELECT t.*,a.nama_area FROM transaksi t
+ LEFT JOIN area_parkir a ON a.id=t.area_id
+ WHERE t.status='Masuk' ORDER BY t.waktu_masuk DESC"
+)->fetchAll();
 
-        // Tekan Enter saat di form login
-        document.getElementById("txtPass").addEventListener("keyup", function(event) {
-            if (event.key === "Enter") {
-                prosesLogin();
-            }
-        });
-    </script>
+$q=trim(isset($_GET['q'])?$_GET['q']:'');
+$where="WHERE t.status='Keluar' AND DATE(t.waktu_keluar)=CURDATE()";
+$params=array();
+if($q){
+$where.=" AND (t.nomor_polisi LIKE ? OR t.kode_transaksi LIKE ?)";
+$params=array('%'.$q.'%','%'.$q.'%');
+}
+$stmt=$pdo->prepare(
+"SELECT t.*,a.nama_area FROM transaksi t
+ LEFT JOIN area_parkir a ON a.id=t.area_id
+ $where ORDER BY t.waktu_keluar DESC LIMIT 100"
+);
+$stmt->execute($params);$out=$stmt->fetchAll();
+?>
+
+<div class="d-flex justify-content-between mb-3">
+<div><p class="text-secondary mb-0">Pantau kendaraan aktif dan proses kendaraan keluar.</p></div>
+<a class="btn btn-primary" href="?page=transaksi&aksi=masuk">+ Parkir Masuk</a>
+</div>
+
+<div class="card p-4 mb-4">
+<h6 class="fw-bold">Kendaraan Masih Terparkir <span class="badge text-bg-warning"><?=count($active)?></span></h6>
+<div class="table-responsive">
+<table class="table">
+<thead><tr><th>Kode</th><th>Plat</th><th>Jenis</th><th>Area</th><th>Waktu Masuk</th><th>Aksi</th></tr></thead>
+<tbody>
+<?php foreach($active as $t): ?>
+<tr>
+<td><?=e($t['kode_transaksi'])?></td>
+<td><b><?=e($t['nomor_polisi'])?></b></td>
+<td><?=e($t['jenis_kendaraan'])?></td>
+<td><?=e($t['nama_area']?$t['nama_area']:'-')?></td>
+<td><?=date('d/m/Y H:i',strtotime($t['waktu_masuk']))?></td>
+<td>
+<form method="post" onsubmit="return confirm('Proses kendaraan keluar?')">
+<input type="hidden" name="csrf" value="<?=e(csrf())?>">
+<input type="hidden" name="action" value="parkir_keluar">
+<input type="hidden" name="transaksi_id" value="<?=$t['id']?>">
+<button class="btn btn-sm btn-success">Kendaraan Keluar</button>
+</form>
+</td>
+</tr>
+<?php endforeach; ?>
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="card p-4">
+<div class="d-flex justify-content-between mb-3">
+<h6 class="fw-bold">Riwayat Keluar</h6>
+<form class="d-flex gap-2">
+<input type="hidden" name="page" value="transaksi">
+<input class="form-control form-control-sm" name="q" placeholder="Cari..." value="<?=e($q)?>">
+<button class="btn btn-sm btn-outline-secondary">Cari</button>
+</form>
+</div>
+<div class="table-responsive">
+<table class="table">
+<thead><tr><th>Kode</th><th>Plat</th><th>Masuk</th><th>Keluar</th><th>Durasi</th><th>Total</th><th>Struk</th></tr></thead>
+<tbody>
+<?php foreach($out as $t): ?>
+<tr>
+<td><?=e($t['kode_transaksi'])?></td>
+<td><b><?=e($t['nomor_polisi'])?></b></td>
+<td><?=date('d/m H:i',strtotime($t['waktu_masuk']))?></td>
+<td><?=date('d/m H:i',strtotime($t['waktu_keluar']))?></td>
+<td><?=e($t['durasi_jam'])?> jam</td>
+<td><?=rupiah($t['total_bayar'])?></td>
+<td><a target="_blank" class="btn btn-sm btn-outline-dark" href="?page=struk&id=<?=$t['id']?>">Cetak</a></td>
+</tr>
+<?php endforeach; ?>
+</tbody>
+</table>
+</div>
+</div>
+<?php endif; ?>
+
+<?php elseif ($page === 'laporan' && can(array('admin','owner'))): ?>
+
+<?php
+$mulai=isset($_GET['mulai'])?$_GET['mulai']:date('Y-m-01');
+$akhir=isset($_GET['akhir'])?$_GET['akhir']:date('Y-m-d');
+
+$stmt=$pdo->prepare(
+"SELECT t.*,a.nama_area FROM transaksi t
+ LEFT JOIN area_parkir a ON a.id=t.area_id
+ WHERE t.status='Keluar' AND DATE(t.waktu_keluar) BETWEEN ? AND ?
+ ORDER BY t.waktu_keluar DESC"
+);
+$stmt->execute(array($mulai,$akhir));
+$rows=$stmt->fetchAll();
+$total=array_sum(array_column($rows,'total_bayar'));
+?>
+
+<div class="card p-4 mb-4 no-print">
+<form class="row g-2 align-items-end">
+<input type="hidden" name="page" value="laporan">
+<div class="col-md-4"><label class="form-label">Mulai</label><input class="form-control" type="date" name="mulai" value="<?=e($mulai)?>"></div>
+<div class="col-md-4"><label class="form-label">Sampai</label><input class="form-control" type="date" name="akhir" value="<?=e($akhir)?>"></div>
+<div class="col-md-4"><button class="btn btn-primary">Tampilkan</button> <button type="button" class="btn btn-outline-secondary" onclick="window.print()">Cetak</button></div>
+</form>
+</div>
+
+<div class="row g-3 mb-3">
+<div class="col-md-4"><div class="card p-4"><small class="text-secondary">Total Transaksi</small><h3 class="fw-bold"><?=count($rows)?></h3></div></div>
+<div class="col-md-4"><div class="card p-4"><small class="text-secondary">Total Pendapatan</small><h3 class="fw-bold"><?=rupiah($total)?></h3></div></div>
+<div class="col-md-4"><div class="card p-4"><small class="text-secondary">Periode</small><h5 class="fw-bold"><?=date('d/m/Y',strtotime($mulai))?> - <?=date('d/m/Y',strtotime($akhir))?></h5></div></div>
+</div>
+
+<div class="card p-4">
+<h5 class="fw-bold">Laporan Transaksi</h5>
+<div class="table-responsive">
+<table class="table">
+<thead><tr><th>No</th><th>Kode</th><th>Plat</th><th>Jenis</th><th>Masuk</th><th>Keluar</th><th>Durasi</th><th>Total</th></tr></thead>
+<tbody>
+<?php foreach($rows as $i=>$r): ?>
+<tr>
+<td><?=$i+1?></td><td><?=e($r['kode_transaksi'])?></td><td><?=e($r['nomor_polisi'])?></td>
+<td><?=e($r['jenis_kendaraan'])?></td>
+<td><?=date('d/m/Y H:i',strtotime($r['waktu_masuk']))?></td>
+<td><?=date('d/m/Y H:i',strtotime($r['waktu_keluar']))?></td>
+<td><?=e($r['durasi_jam'])?> jam</td><td><?=rupiah($r['total_bayar'])?></td>
+</tr>
+<?php endforeach; ?>
+</tbody>
+</table>
+</div>
+</div>
+
+<?php elseif ($page === 'log' && can(array('admin'))): ?>
+
+<?php $logs=$pdo->query("SELECT * FROM login_log WHERE DATE(waktu)=CURDATE() ORDER BY id DESC LIMIT 200")->fetchAll(); ?>
+<p class="text-secondary">Catatan login, logout, perubahan password, dan transaksi.</p>
+<div class="card p-4">
+<div class="table-responsive">
+<table class="table">
+<thead><tr><th>Waktu</th><th>User</th><th>Aktivitas</th><th>Keterangan</th><th>IP</th></tr></thead>
+<tbody>
+<?php foreach($logs as $l): ?>
+<tr>
+<td><?=date('d/m/Y H:i:s',strtotime($l['waktu']))?></td>
+<td><?=e($l['username'])?></td>
+<td><span class="badge badge-soft"><?=e($l['aktivitas'])?></span></td>
+<td><?=e($l['keterangan'])?></td>
+<td><?=e($l['ip_address'])?></td>
+</tr>
+<?php endforeach; ?>
+</tbody>
+</table>
+</div>
+</div>
+
+<?php elseif ($page === 'profile'): ?>
+
+<?php
+$stmt=$pdo->prepare("SELECT * FROM users WHERE id=?");
+$stmt->execute(array(currentUser()['id']));
+$me=$stmt->fetch();
+?>
+
+<div class="row g-3">
+<div class="col-lg-5">
+<div class="card p-4 text-center">
+<img class="profile-big mx-auto" src="<?=e(getPhoto($me))?>" onerror="this.src='foto/<?=e($me['level'])?>.svg'">
+<h4 class="fw-bold mt-3"><?=e($me['nama_lengkap'])?></h4>
+<p class="text-secondary text-capitalize"><?=e($me['level'])?> • @<?=e($me['username'])?></p>
+<div class="text-start small text-secondary">
+<div><b>Email:</b> <?=e($me['email']?$me['email']:'-')?></div>
+<div><b>No. HP:</b> <?=e($me['no_hp']?$me['no_hp']:'-')?></div>
+<div><b>Alamat:</b> <?=e($me['alamat']?$me['alamat']:'-')?></div>
+</div>
+<hr>
+<form method="post" enctype="multipart/form-data" class="text-start">
+<input type="hidden" name="csrf" value="<?=e(csrf())?>">
+<input type="hidden" name="action" value="save_profile">
+<label class="form-label">Foto Profil</label>
+<input class="form-control mb-3" type="file" name="foto" accept=".jpg,.jpeg,.png,.webp">
+<small class="text-secondary d-block mb-3">JPG/PNG/WEBP, maksimal 2 MB.</small>
+<label class="form-label">Nama Lengkap</label>
+<input class="form-control mb-3" name="nama_lengkap" value="<?=e($me['nama_lengkap'])?>" required>
+<label class="form-label">Email</label>
+<input class="form-control mb-3" name="email" value="<?=e($me['email'])?>">
+<label class="form-label">No. HP</label>
+<input class="form-control mb-3" name="no_hp" value="<?=e($me['no_hp'])?>">
+<label class="form-label">Alamat</label>
+<textarea class="form-control mb-3" name="alamat" rows="3"><?=e($me['alamat'])?></textarea>
+<button class="btn btn-primary w-100">Simpan Profil & Foto</button>
+</form>
+</div>
+</div>
+
+<div class="col-lg-7">
+<div class="card p-4">
+<h5 class="fw-bold mb-3">Ganti Password</h5>
+<form method="post">
+<input type="hidden" name="csrf" value="<?=e(csrf())?>">
+<input type="hidden" name="action" value="change_password">
+<label class="form-label">Password Lama</label>
+<input class="form-control mb-3" type="password" name="old_password" required>
+<label class="form-label">Password Baru</label>
+<input class="form-control mb-3" type="password" name="new_password" minlength="6" required>
+<label class="form-label">Konfirmasi Password Baru</label>
+<input class="form-control mb-4" type="password" name="confirm_password" required>
+<button class="btn btn-primary">Simpan Password</button>
+</form>
+</div>
+</div>
+</div>
+
+<?php elseif ($page === 'struk'): ?>
+
+<?php
+$id=(int)(isset($_GET['id'])?$_GET['id']:0);
+$stmt=$pdo->prepare(
+"SELECT t.*,a.nama_area,u.nama_lengkap petugas
+ FROM transaksi t
+ LEFT JOIN area_parkir a ON a.id=t.area_id
+ LEFT JOIN users u ON u.id=t.petugas_keluar
+ WHERE t.id=?"
+);
+$stmt->execute(array($id));
+$t=$stmt->fetch();
+?>
+
+<?php if(!$t): ?>
+<div class="alert alert-danger">Struk tidak ditemukan.</div>
+<?php else: ?>
+<div class="row justify-content-center">
+<div class="col-md-5">
+<div class="card p-4" id="receipt">
+<div class="text-center">
+<h4 class="fw-bold mb-0">🅿️ ParkirPro</h4>
+<small>Smart Parking System</small><hr><h6>STRUK PARKIR</h6>
+</div>
+<div class="small mt-3">
+<div class="d-flex justify-content-between"><span>Kode</span><b><?=e($t['kode_transaksi'])?></b></div>
+<div class="d-flex justify-content-between"><span>No. Polisi</span><b><?=e($t['nomor_polisi'])?></b></div>
+<div class="d-flex justify-content-between"><span>Jenis</span><b><?=e($t['jenis_kendaraan'])?></b></div>
+<div class="d-flex justify-content-between"><span>Area</span><b><?=e($t['nama_area']?$t['nama_area']:'-')?></b></div>
+<div class="d-flex justify-content-between"><span>Masuk</span><b><?=date('d/m/Y H:i',strtotime($t['waktu_masuk']))?></b></div>
+<div class="d-flex justify-content-between"><span>Keluar</span><b><?= $t['waktu_keluar']?date('d/m/Y H:i',strtotime($t['waktu_keluar'])):'-'?></b></div>
+<div class="d-flex justify-content-between"><span>Durasi</span><b><?=e($t['durasi_jam']?$t['durasi_jam']:'-')?> jam</b></div>
+<hr>
+<div class="d-flex justify-content-between fs-5"><b>TOTAL</b><b><?=rupiah($t['total_bayar'])?></b></div>
+</div>
+<p class="text-center small text-secondary mt-4 mb-0">Terima kasih. Simpan struk sebagai bukti pembayaran.</p>
+</div>
+<div class="d-flex gap-2 mt-3 no-print">
+<button onclick="window.print()" class="btn btn-primary flex-fill">Cetak Struk</button>
+<a href="?page=transaksi" class="btn btn-outline-secondary">Kembali</a>
+</div>
+</div>
+</div>
+<?php endif; ?>
+
+<?php else: ?>
+
+<div class="alert alert-warning">
+Halaman tidak tersedia atau Anda tidak memiliki hak akses.
+</div>
+
+<?php endif; ?>
+
+</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
